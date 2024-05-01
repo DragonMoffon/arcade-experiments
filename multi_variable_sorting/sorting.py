@@ -24,6 +24,8 @@ JSON_NAME = "objects"
 POINT_SIZE = 2
 FONT_NAME = "bahnschrift"
 SELECTED_CHOICES = 10
+BEST_X = 10
+TOP_X = 30
 #############
 
 dimensionmap = {
@@ -46,8 +48,24 @@ def cast_or_none(obj, t: Type[T]) -> T | None:
 
 
 # NOTE: THIS IS THE FUNCTION ACTUALLY IN THE BOT
-def points_from_objects(val: float, objects: list[DigiObject], int_priority: float = 1, one_priority: float = 1) -> PointsAndLabels:
-    li = []
+# def points_from_objects(val: float, objects: list[DigiObject], int_priority: float = 1, one_priority: float = 1) -> PointsAndLabels:
+#     li = []
+#     for obj in objects:
+#         ratio = val / obj.unitlength
+#         rounded_ratio = round(ratio)
+#         intness = 2.0 * (ratio-rounded_ratio)  # -1.0 to 1.0
+#
+#         oneness = (1.0-ratio if ratio > 1 else 1.0/ratio - 1.0)
+#         oneness = math.copysign(oneness**2 / 25.0, oneness)
+#
+#         p = oneness / one_priority, intness / int_priority
+#         d = math.dist((0, 0), p)
+#
+#         li.append((p, d, obj.name, obj.unitlength, ratio))
+#     return sorted(li, key=lambda x: x[1])
+
+
+def points_from_objects(val: float, objects: list[DigiObject]):
     for obj in objects:
         ratio = val / obj.unitlength
         rounded_ratio = round(ratio)
@@ -56,11 +74,53 @@ def points_from_objects(val: float, objects: list[DigiObject], int_priority: flo
         oneness = (1.0-ratio if ratio > 1 else 1.0/ratio - 1.0)
         oneness = math.copysign(oneness**2 / 25.0, oneness)
 
-        p = oneness / one_priority, intness / int_priority
-        d = math.dist((0, 0), p)
+        p = oneness, intness
+        d = oneness**2 + intness**2
 
-        li.append((p, d, obj.name, obj.unitlength, ratio))
-    return sorted(li, key=lambda x: x[1])
+        yield p, d, obj
+
+
+def x_best(val: float, objects: list[DigiObject], x: int):
+    best_dict: dict[float, list] = {
+        1.0: [],
+        0.5: [],
+        2.0: [],
+        1.5: [],
+        3.0: [],
+        2.5: [],
+        4.0: [],
+        5.0: [],
+        6.0: []
+    }
+
+    dists = []
+    for obj in objects:
+        ratio = val / obj.unitlength
+        ratio_semi = round(ratio, 1)
+        rounded_ratio = round(ratio)
+
+        intness = 2.0 * (ratio - rounded_ratio)
+
+        oneness = (1.0 - ratio if ratio > 1.0 else 1.0 / ratio - 1.0)
+
+        dist = intness ** 2 + oneness ** 2
+
+        p = (dist, (oneness, intness), obj)
+        if ratio_semi in best_dict:
+            best_dict[ratio_semi].append(p)
+        else:
+            dists.append(p)
+
+    best = []
+    for at_val in best_dict.values():
+        best.extend(at_val)
+        if len(best) >= x:
+            break
+    else:
+        dists = sorted(dists, key=lambda p: p[0])
+        best.extend(dists[:x])
+
+    return best[:x]
 
 
 class ObjectData(TypedDict):
@@ -130,10 +190,26 @@ class PlotWindow(Window):
 
         self.objects_path = Path(JSON_NAME)
         self.objects = self.create_objects()
-        self.points = self.create_points()
+
+        self.top_x = []
+        self.dists = []
 
         self.batch = Batch()
         self.texts: list[arcade.Text] = []
+        for _ in range(TOP_X):
+            self.texts.append(arcade.Text(
+                "", 0, 0,
+                font_name=FONT_NAME,
+                font_size=16, batch=self.batch
+            ))
+            self.texts.append(arcade.Text(
+                "", 0, 0,
+                font_name=FONT_NAME,
+                font_size=16, anchor_y="top", batch=self.batch
+            ))
+
+
+        self.are_points_dirty: bool = True
 
     def create_objects(self) -> list[DigiObject]:
         objs = []
@@ -143,7 +219,32 @@ class PlotWindow(Window):
         return objs
 
     def create_points(self) -> PointsAndLabels:
-        self.points = points_from_objects(self.current_height, self.objects, self.int_priority, self.one_priority)
+        self.dists = tuple(points_from_objects(self.current_height, self.objects))
+        self.top_x = x_best(self.current_height, self.objects, TOP_X)
+
+        for index, vals in enumerate(self.top_x):
+            dist, point, obj = vals
+            screen_p = point[0] * self.graph_size, point[1] * self.graph_size
+            r = self.current_height / obj.unitlength
+            i_t, i_s = 2 * index, 2 * index + 1
+
+            self.texts[i_t].x = self.texts[i_s].x = screen_p[0] + 1
+            self.texts[i_t].y = screen_p[1] + 1
+            self.texts[i_s].y = screen_p[1] - 1
+
+            self.texts[i_t].text = str(obj.name)
+            self.texts[i_s].text = f"{obj.unitlength:.2f}m ({r:.1f}x)"
+
+            if index < BEST_X:
+                self.texts[i_t].color = arcade.color.GREEN
+            else:
+                self.texts[i_t].color = arcade.color.BLUE
+
+            if point[1] < 0.5:
+                self.texts[i_s].color = arcade.color.GOLD
+            else:
+                self.texts[i_s].color = arcade.color.WHITE
+        self.are_points_dirty = False
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.KEY_0 or symbol == arcade.key.NUM_0:
@@ -185,6 +286,9 @@ class PlotWindow(Window):
         self.int_priority = max(0.1, round(self.int_priority, 1))
         self.one_priority = max(0.1, round(self.one_priority, 1))
 
+        self.are_points_dirty = False
+        self.create_points()
+
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         self.mouse_down = True
 
@@ -197,6 +301,7 @@ class PlotWindow(Window):
         else:
             self.graph_size = self.graph_size / 1.1
         self.graph_size = max(1, self.graph_size)
+        self.are_points_dirty = True
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.mouse_down:
@@ -204,15 +309,16 @@ class PlotWindow(Window):
             self.camera.position = ox - dx, oy - dy
 
     def on_draw(self):
+        if self.are_points_dirty:
+            self.create_points()
+
         self.camera.use()
-        self.create_points()
-        self.texts.clear()
         self.clear(arcade.color.GRAY_BLUE)
 
         # Draw plot
         arcade.draw_line(-self.width, 0, self.width, 0, arcade.color.GRAY)
         arcade.draw_line(0, -self.height, 0, self.height, arcade.color.GRAY)
-        points = [(p[0] * self.graph_size,p[1] * self.graph_size) for p, _, _, _, _ in self.points]
+        points = [(p[0] * self.graph_size, p[1] * self.graph_size) for p, _, _ in self.dists]
 
         # Draw points
         arcade.draw_points(points, arcade.color.WHITE, POINT_SIZE)
@@ -220,41 +326,12 @@ class PlotWindow(Window):
         # Draw radius
         arcade.draw_circle_filled(0, 0, self.dist_limit * self.graph_size, (0, 0, 255, 32))
 
-        point_num = 0
-        possible_matches = 0
-
-        # Draw points in the circle blue
-        for p, d, l, s, r in self.points:
-            point_num += 1
-
-            # get screen p
-            screen_p = p[0] * self.graph_size, p[1] * self.graph_size
-            if d < self.dist_limit:
-                arcade.draw_point(screen_p[0], screen_p[1], arcade.color.BLUE, POINT_SIZE)
-                possible_matches += 1
-
-            # If point is first 10, draw line
-            if point_num <= 10 and d < self.dist_limit:
-                arcade.draw_line(0, 0, screen_p[0], screen_p[1], arcade.color.RED)
-
-            # Draw labels
-            intness = abs(r - round(r))
-            if self.draw_labels and point_num <= 100:
-                if d < self.dist_limit * 2:
-                    c = arcade.color.BLUE if d <= self.dist_limit else arcade.color.WHITE
-                    self.texts.append(arcade.Text(l, screen_p[0] + 1, screen_p[1] + 1,
-                                      font_name = FONT_NAME, color = arcade.color.GREEN if point_num <= 10 else c,
-                                      font_size = 16, batch = self.batch))
-                    self.texts.append(arcade.Text(f"{s:.2f}m ({r:.1f}x)", screen_p[0] + 1, screen_p[1] - 1,
-                                      font_name = FONT_NAME, color = arcade.color.GOLD if intness <= 0.05 or intness >= 0.95 else c,
-                                      font_size = 16, anchor_y = "top", batch = self.batch))
-
         with self.ctx.pyglet_rendering():
             self.batch.draw()
 
         self.default_camera.use()
         # Draw current height
-        arcade.draw_text(f"Current height: {self.current_height}m\nInteger priority: {self.int_priority}\nOneness priority: {self.one_priority}\nMatches: {possible_matches}",
+        arcade.draw_text(f"Current height: {self.current_height}m\nInteger priority: {self.int_priority}\nOneness priority: {self.one_priority}",
                           5, self.height - 5,
                           font_name = FONT_NAME, color = arcade.color.RED, font_size = 24,
                           anchor_y = "top", multiline = True, width = self.width)
