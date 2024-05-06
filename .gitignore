@@ -1,1 +1,4 @@
 */__pycache__/
+.flake8
+
+.vscode/launch.json
