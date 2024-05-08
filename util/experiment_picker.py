@@ -3,7 +3,7 @@ import arcade
 import pyglet
 
 from util import ProceduralAnimator, SecondOrderAnimatorBase
-from util import load_sound
+from util import load_shared_sound
 
 
 class ExperimentPickerWindow(arcade.Window):
@@ -15,8 +15,8 @@ class ExperimentPickerWindow(arcade.Window):
         self._experiment_names = tuple(experiments.keys())
 
         self._selected: int = 0
-        self._blip_sound: arcade.Sound = load_sound()
-        self._select_sound: arcade.Sound = load_sound("blip_a")
+        self._blip_sound: arcade.Sound = load_shared_sound("blip_c")
+        self._select_sound: arcade.Sound = load_shared_sound("blip_a")
         self._scroll_animator: SecondOrderAnimatorBase = ProceduralAnimator(1.0, 0.75, 1.0, 0.0, 0.0, 0.0)
         self._text_cam: arcade.camera.Camera2D = arcade.camera.Camera2D(position=(0.0, 0.0), viewport=(10, 10, self.width-20, self.height-100))
         self._text_cam.equalise()

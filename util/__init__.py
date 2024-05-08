@@ -6,9 +6,17 @@ import arcade
 
 from util.procedural_animator import *
 
-import util.data as data
+import data.fonts as fonts
+import data.sounds as sounds
 
-get_font_path = make_package_path_finder(data, "ttf")
-get_sound_path = make_package_path_finder(data, "wav")
-def load_font(name: str = "gohu"): arcade.load_font(get_font_path(name))
-def load_sound(name: str = "blip_c"): return arcade.load_sound(get_sound_path(name))
+__all__ = (
+    "get_shared_font_path",
+    "get_shared_sound_path",
+    "load_shared_font",
+    "load_shared_sound"
+)
+
+get_shared_font_path = make_package_path_finder(fonts, "ttf")
+get_shared_sound_path = make_package_path_finder(sounds, "wav")
+def load_shared_font(name: str): arcade.load_font(get_shared_font_path(name))
+def load_shared_sound(name: str): return arcade.load_sound(get_shared_sound_path(name))
