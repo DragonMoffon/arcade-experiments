@@ -2,3 +2,4 @@
 .flake8
 
 .vscode/launch.json
+*.pyc
