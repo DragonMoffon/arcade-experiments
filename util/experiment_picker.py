@@ -78,6 +78,16 @@ class ExperimentPickerWindow(arcade.Window):
             case arcade.key.ENTER:
                 self.select()
 
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if scroll_y >= 1:
+            self.select_prev()
+        elif scroll_y <= -1:
+            self.select_next()
+
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.select()
+
     def on_update(self, delta_time: float):
         pos = self._text[self._selected].position[1]
         self._scroll_animator.update(delta_time, pos)
