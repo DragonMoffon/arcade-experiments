@@ -3,6 +3,7 @@ import arcade
 import pyglet
 
 from util import ProceduralAnimator, SecondOrderAnimatorBase
+from util import load_sound
 
 
 class ExperimentPickerWindow(arcade.Window):
@@ -14,6 +15,8 @@ class ExperimentPickerWindow(arcade.Window):
         self._experiment_names = tuple(experiments.keys())
 
         self._selected: int = 0
+        self._blip_sound: arcade.Sound = load_sound()
+        self._select_sound: arcade.Sound = load_sound("blip_a")
         self._scroll_animator: SecondOrderAnimatorBase = ProceduralAnimator(1.0, 0.75, 1.0, 0.0, 0.0, 0.0)
         self._text_cam: arcade.camera.Camera2D = arcade.camera.Camera2D(position=(0.0, 0.0), viewport=(10, 10, self.width-20, self.height-100))
         self._text_cam.equalise()
@@ -40,19 +43,30 @@ class ExperimentPickerWindow(arcade.Window):
         self._text_cam.use()
         self._text_batch.draw()
 
-    def select_next(self):
+    def select_next(self, silent: bool = False):
         self._selected = (self._selected + 1) % len(self._experiment_names)
         y = self._text[self._selected].position[1]
         self._selector_left.y = y
         self._selector_right.y = y
 
-    def select_prev(self):
+        if silent:
+            return
+
+        self._blip_sound.play()
+
+    def select_prev(self, silent: bool = False):
         self._selected = (self._selected - 1) % len(self._experiment_names)
         y = self._text[self._selected].position[1]
         self._selector_left.y = y
         self._selector_right.y = y
 
+        if silent:
+            return
+
+        self._blip_sound.play()
+
     def select(self):
+        self._select_sound.play()
         selected = self._experiment_names[self._selected]
         main_func, args, kwargs = self._experiments[selected]
         del self._experiments

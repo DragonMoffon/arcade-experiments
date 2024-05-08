@@ -3,13 +3,14 @@ from contextlib import contextmanager
 import importlib.resources as pkg_resources
 
 __all__ = (
-    "make_package_file_loader",
+    "make_package_file_opener",
     "make_package_string_loader",
-    "make_package_binary_loader"
+    "make_package_binary_loader",
+    "make_package_path_finder"
 )
 
 
-def make_package_file_loader(
+def make_package_file_opener(
         package,
         data_type: str,
         mode: str = "r",
@@ -76,3 +77,12 @@ def make_package_binary_loader(package, data_type: str):
         file_name = f"{name}.{data_type}"
         return pkg_resources.read_binary(package, file_name)
     return _binary_loader
+
+
+def make_package_path_finder(package, data_type: str):
+    def _path_finder(name: str):
+        file_name = f"{name}.{data_type}"
+        with pkg_resources.path(package, file_name) as path:
+            return path
+
+    return _path_finder

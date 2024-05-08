@@ -1,9 +1,14 @@
 # flake8: noqa
 
-from arcade import load_font
+from data_loading import make_package_path_finder
+
+import arcade
 
 from util.procedural_animator import *
 
+import util.data as data
 
-def load_gohu_font():
-    load_font("./util/gohu.ttf")
+get_font_path = make_package_path_finder(data, "ttf")
+get_sound_path = make_package_path_finder(data, "wav")
+def load_font(name: str = "gohu"): arcade.load_font(get_font_path(name))
+def load_sound(name: str = "blip_c"): return arcade.load_sound(get_sound_path(name))
