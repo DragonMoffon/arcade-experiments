@@ -2,7 +2,7 @@ from typing import Callable
 import arcade
 import pyglet
 
-from util import ProceduralAnimator
+from util import ProceduralAnimator, SecondOrderAnimatorBase
 
 
 class ExperimentPickerWindow(arcade.Window):
@@ -14,7 +14,7 @@ class ExperimentPickerWindow(arcade.Window):
         self._experiment_names = tuple(experiments.keys())
 
         self._selected: int = 0
-        self._scroll_animator: ProceduralAnimator = ProceduralAnimator(1.0, 0.75, 1.0, 0.0, 0.0, 0.0)
+        self._scroll_animator: SecondOrderAnimatorBase = ProceduralAnimator(1.0, 0.75, 1.0, 0.0, 0.0, 0.0)
         self._text_cam: arcade.camera.Camera2D = arcade.camera.Camera2D(position=(0.0, 0.0), viewport=(10, 10, self.width-20, self.height-100))
         self._text_cam.equalise()
 

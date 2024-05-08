@@ -4,6 +4,7 @@ from typing import TypeVar, Protocol, Optional
 
 
 __all__ = (
+    'SecondOrderAnimatorBase',
     'ProceduralAnimator',
     'SecondOrderAnimator',
     'SecondOrderAnimatorTCritical',
