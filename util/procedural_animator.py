@@ -9,7 +9,8 @@ __all__ = (
     'SecondOrderAnimator',
     'SecondOrderAnimatorTCritical',
     'SecondOrderAnimatorKClamped',
-    'SecondOrderAnimatorPoleZero'
+    'SecondOrderAnimatorPoleZero',
+    'update_default_animator'
 )
 
 

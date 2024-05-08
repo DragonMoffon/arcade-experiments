@@ -4,7 +4,7 @@ from data_loading import make_package_path_finder
 
 import arcade
 
-from util.procedural_animator import *
+from util.procedural_animator import ProceduralAnimator
 
 import data.fonts as fonts
 import data.sounds as sounds
@@ -13,7 +13,8 @@ __all__ = (
     "get_shared_font_path",
     "get_shared_sound_path",
     "load_shared_font",
-    "load_shared_sound"
+    "load_shared_sound",
+    'ProceduralAnimator',
 )
 
 get_shared_font_path = make_package_path_finder(fonts, "ttf")
