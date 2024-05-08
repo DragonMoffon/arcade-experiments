@@ -2,13 +2,14 @@ from arcade import Window
 from arcade import SpriteSolidColor
 
 from animator.animator import DragonAnimator
+from animator import lerp
 
 
 class AnimWindow(Window):
     def __init__(self):
         super().__init__(1280, 720, "Animator Test")
 
-        self.a_b: DragonAnimator[SpriteSolidColor] = DragonAnimator(("center_x", "center_y"))
+        self.a_b: DragonAnimator[SpriteSolidColor] = DragonAnimator(("center_x", "center_y"), lerp.ease_quadinout)
         self.sprite = self.a_b.proxy(SpriteSolidColor(100, 100, 100, self.center_y))
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):

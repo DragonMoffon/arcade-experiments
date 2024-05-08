@@ -17,12 +17,13 @@ class Animatable(Protocol):
 
 T = TypeVar('T')
 A = TypeVar('A', bound=Animatable)
+AnimationFunction = Callable[[float, float, float, float, A], A]
 
 
 class AnimatableProxy(Generic[T]):
 
     def __init__(self, obj: T, anim_speed: float, animated_attributes: tuple[str, ...],
-                 animation_function: Callable[[float, float, float, float, A], A] = ease_linear):
+                 animation_function: AnimationFunction = ease_linear):
         self._core = obj
         self._time = 0.0
         self._speed = anim_speed
@@ -66,12 +67,13 @@ class AnimatableProxy(Generic[T]):
 
 class DragonAnimator(Generic[T]):
 
-    def __init__(self, animated_attributes: tuple[str, ...]):
+    def __init__(self, animated_attributes: tuple[str, ...], animation_function: AnimationFunction = ease_linear):
         self._proxies: list[AnimatableProxy[T]] = list()
         self._attrs = animated_attributes
+        self._anim_func = animation_function
 
     def proxy(self, obj: T) -> AnimatableProxy[T]:
-        proxy = AnimatableProxy(obj, 1.0, self._attrs)
+        proxy = AnimatableProxy(obj, 1.0, self._attrs, self._anim_func)
         self._proxies.append(proxy)
         return proxy
 

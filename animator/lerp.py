@@ -1,3 +1,6 @@
+import math
+
+
 def clamp(minVal, val, maxVal):
     """Clamp a `val` to be no lower than `minVal`, and no higher than `maxVal`."""
     return max(minVal, min(maxVal, val))
@@ -26,3 +29,13 @@ def ease_linear(minimum: float, maximum: float, start: float, end: float, x: flo
        * `x: float`: the current x, often a time"""
     x = find_percent(start, end, x)
     return lerp(minimum, maximum, x)
+
+
+def ease_quadinout(minimum: float, maximum: float, start: float, end: float, x: float) -> float:
+    """https://easings.net/#easeInOutQuad"""
+    x = find_percent(start, end, x)
+    if x < 0.5:
+        zo = 2 * x * x
+    else:
+        zo = 1 - math.pow(-2 * x + 2, 2) / 2
+    return lerp(minimum, maximum, zo)
