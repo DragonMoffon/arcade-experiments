@@ -23,7 +23,7 @@ def make_package_file_loader(
     """
     Create a reusable function for opening files of a particular type at a particular location
     Can also set new defaults for the `open` function used internally.
-    
+
     See `open` for other arguments
 
     :param package: the location to open at, as a package str.

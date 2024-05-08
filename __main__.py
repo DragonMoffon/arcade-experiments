@@ -14,4 +14,3 @@ if __name__ == '__main__':
             "Automatic Animator": (animator_main, (), {})
         }
     )
-

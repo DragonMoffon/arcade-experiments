@@ -1,7 +1,7 @@
 from arcade import Window
 from arcade import SpriteSolidColor
 
-from animator.animator import Animator, DragonAnimator
+from animator.animator import DragonAnimator
 
 
 class AnimWindow(Window):
@@ -10,7 +10,6 @@ class AnimWindow(Window):
 
         self.a_b: DragonAnimator[SpriteSolidColor] = DragonAnimator(("center_x", "center_y"))
         self.sprite = self.a_b.proxy(SpriteSolidColor(100, 100, 100, self.center_y))
-
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         print(self.sprite.__dict__)

@@ -14,7 +14,7 @@ from arcade import Window
 from pyglet.graphics import Batch
 
 load_json_string = make_package_string_loader(data, "json")
-load_json = lambda name: loads(load_json_string(name))
+load_json = lambda name: loads(load_json_string(name))  # noqa: E731
 
 
 ### CONSTANTS
@@ -168,6 +168,7 @@ class DigiObject:
             weight = cast_or_none(data.get("weight", None), float),
         )
 
+
 BestList = tuple[float, tuple[float, float], DigiObject]
 
 
@@ -207,7 +208,6 @@ class PlotWindow(Window):
                 font_name=FONT_NAME,
                 font_size=16, anchor_y="top", batch=self.batch
             ))
-
 
         self.are_points_dirty: bool = True
 

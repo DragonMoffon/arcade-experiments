@@ -1,7 +1,5 @@
 from typing import Callable, Iterable, TypeVar, Protocol, Generic
 
-import _weakref
-
 from animator.lerp import ease_linear
 
 
