@@ -1,5 +1,5 @@
-from util.experiment_picker import main
-from util import load_shared_font
+from experiment_picker import main
+from common.util import load_shared_font
 
 from dda2d.window import main as dda2d_main
 from multi_variable_sorting.sorting import main as mvs_main

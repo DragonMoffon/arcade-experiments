@@ -3,7 +3,7 @@ from pyglet.math import Vec2
 
 from animator.lerp import ease_linear
 from dda2d.dda import Grid, dda
-from util import load_shared_sound
+from common.util import load_shared_sound
 
 GRID_X_SIZE = 525
 GRID_Y_SIZE = 525

@@ -2,8 +2,7 @@ from typing import Callable
 import arcade
 import pyglet
 
-from util import ProceduralAnimator, SecondOrderAnimatorBase
-from util import load_shared_sound
+from common.util import ProceduralAnimator, SecondOrderAnimatorBase, load_shared_sound
 
 
 class ExperimentPickerWindow(arcade.Window):
