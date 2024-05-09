@@ -1,10 +1,7 @@
-import importlib.resources as pkg_resources
-
 import arcade
 from pyglet.math import Vec2
 
 from animator.lerp import ease_linear
-import common.data.sounds
 from dda2d.dda import Grid, dda
 from util import load_shared_sound
 
