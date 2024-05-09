@@ -1,7 +1,6 @@
 # flake8: noqa
 
 import arcade
-from arcade import load_font
 
 from common.data_loading import make_package_path_finder
 import common.data.fonts as fonts
