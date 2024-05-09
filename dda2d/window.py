@@ -4,7 +4,7 @@ import arcade
 from pyglet.math import Vec2
 
 from animator.lerp import ease_linear
-import common.sfx
+import common.data.sounds
 from dda2d.dda import Grid, dda
 
 GRID_X_SIZE = 525
@@ -13,7 +13,7 @@ GRID_TILE_SIZE = 25
 
 
 def sound_loader(s: str) -> arcade.Sound:
-    with pkg_resources.path(common.sfx, s + ".wav") as p:
+    with pkg_resources.path(common.data.sounds, s + ".wav") as p:
         return arcade.Sound(p)
 
 
@@ -32,7 +32,7 @@ class Application(arcade.Window):
                                 font_name="GohuFont 11 Nerd Font Mono", font_size=22,
                                 anchor_x = "center", anchor_y = "center")
 
-        with pkg_resources.path(common.sfx, "ambience.wav") as p:
+        with pkg_resources.path(common.data.sounds, "ambience.wav") as p:
             self.ambience = arcade.Sound(p, True)
 
         self.cursor = Vec2(-100, -100)

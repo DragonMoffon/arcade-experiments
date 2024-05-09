@@ -6,8 +6,8 @@ import arcade
 
 from common.util.procedural_animator import ProceduralAnimator, SecondOrderAnimatorBase
 
-import data.fonts as fonts
-import data.sounds as sounds
+import common.data.fonts as fonts
+import common.data.sounds as sounds
 
 __all__ = (
     "get_shared_font_path",
