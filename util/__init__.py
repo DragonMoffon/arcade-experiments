@@ -1,10 +1,10 @@
 # flake8: noqa
 
-from data_loading import make_package_path_finder
+from common.data_loading import make_package_path_finder
 
 import arcade
 
-from util.procedural_animator import ProceduralAnimator, SecondOrderAnimatorBase
+from common.util.procedural_animator import ProceduralAnimator, SecondOrderAnimatorBase
 
 import data.fonts as fonts
 import data.sounds as sounds

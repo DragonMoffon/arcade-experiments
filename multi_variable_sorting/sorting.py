@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import multi_variable_sorting.data as data
-from data_loading import make_package_string_loader
+from common.data_loading import make_package_string_loader
 from json import loads
 
 import math
