@@ -1,3 +1,4 @@
+from itertools import cycle
 import arcade
 from pyglet.math import Vec2
 
@@ -20,7 +21,7 @@ class Application(arcade.Window):
                          (self.width - GRID_X_SIZE) / 2, (self.height - GRID_Y_SIZE) / 2 - 50)
 
         text_center_y = self.height - ((self.height - self.grid.max_y) / 2)
-        self.text = arcade.Text("[LMB] to draw, [RMB] to clear",
+        self.text = arcade.Text("[LMB] to draw, [MMB] to change color, [RMB] to clear",
                                 self.center_x, text_center_y,
                                 font_name="GohuFont 11 Nerd Font Mono", font_size=22,
                                 anchor_x = "center", anchor_y = "center")
@@ -30,7 +31,8 @@ class Application(arcade.Window):
         self.cursor = Vec2(-100, -100)
         self.start_point = Vec2(-100, -100)
         self.end_point = Vec2(-100, -100)
-        self.point_list = []
+        self.point_list = set()
+        self.all_points = set()
         self.drawing = False
 
         self.first_click: float = None
@@ -56,7 +58,7 @@ class Application(arcade.Window):
             if self.drawing:
                 old_point_list = self.point_list
                 self.end_point = Vec2(x, y)
-                self.point_list = dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point))
+                self.point_list = set(dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
 
                 if (old_point_list != self.point_list and self.last_played_sound + self.sounds["blip_e"].get_length() / 2 <= self.local_time):
                     self.play_sound("blip_e")
@@ -68,22 +70,27 @@ class Application(arcade.Window):
                 self.first_click = self.local_time
             self.drawing = True
             self.start_point = Vec2(x, y)
+            self.grid.pulse(self.cursor)
             self.play_sound("blip_a")
+        if button == arcade.MOUSE_BUTTON_MIDDLE:
+            self.grid.next_color()
         if button == arcade.MOUSE_BUTTON_RIGHT:
-            self.point_list = []
+            self.point_list = set()
+            self.all_points = set()
             self.play_sound("blip_c")
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.drawing = False
             self.end_point = Vec2(x, y)
-            self.point_list = dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point))
+            self.point_list = set(dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
+            self.all_points |= set(self.point_list)
 
     def on_draw(self):
         self.clear()
         self.grid.draw()
-        self.grid.draw_point_list(self.point_list)
-        self.grid.draw_point(self.cursor)
+        self.grid.draw_point_list(self.all_points | self.point_list)
+        self.grid.draw_cursor(self.cursor)
         self.text.draw()
 
     def on_update(self, delta_time: float):
@@ -95,6 +102,8 @@ class Application(arcade.Window):
         elif self.first_click is not None and self.first_click <= self.local_time <= self.first_click + self.fade_time:
             alpha = int(ease_linear(255, 0, self.first_click, self.first_click + self.fade_time, self.local_time))
             self.text.color = arcade.color.WHITE.rgb + (alpha,)
+
+        self.grid.update(delta_time)
 
 
 def main():
