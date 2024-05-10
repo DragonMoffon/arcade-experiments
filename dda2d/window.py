@@ -82,8 +82,8 @@ class Application(arcade.Window):
     def on_draw(self):
         self.clear()
         self.grid.draw()
-        self.grid.draw_point(self.cursor)
         self.grid.draw_point_list(self.point_list)
+        self.grid.draw_point(self.cursor)
         self.text.draw()
 
     def on_update(self, delta_time: float):

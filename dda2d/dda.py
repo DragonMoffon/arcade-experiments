@@ -47,6 +47,20 @@ class Grid:
         self.x_offset = x_offset
         self.y_offset = y_offset
 
+        self.sprites = []
+        self.sprite_list = arcade.SpriteList()
+
+        for x in range(self.x_size // self.tile_size):
+            l = []
+            for y in range(self.y_size // self.tile_size):
+                p = self.index_to_point((x, y))
+                s = arcade.SpriteSolidColor(self.tile_size, self.tile_size, p.x, p.y, arcade.types.Color.random())
+                l.append(s)
+                self.sprite_list.append(s)
+                s.scale = 0
+            self.sprites.append(l)
+
+
     @property
     def max_x(self) -> float:
         return self.x_offset + self.x_size
@@ -59,6 +73,8 @@ class Grid:
         cur_x = self.x_offset
         cur_y = self.y_offset
 
+        self.sprite_list.draw()
+
         for x in range(int(self.x_size / self.tile_size) + 1):
             arcade.draw_line(cur_x, self.y_offset, cur_x, self.max_y, color, line_width)
             cur_x += self.tile_size
@@ -68,14 +84,18 @@ class Grid:
             cur_y += self.tile_size
 
     def draw_point(self, point: Vec2, color = arcade.color.RED):
-        snap_p = self.snap(point)
-        arcade.draw_lrbt_rectangle_filled(
-            snap_p.x - (self.tile_size / 2), snap_p.x + (self.tile_size / 2),
-            snap_p.y - (self.tile_size / 2), snap_p.y + (self.tile_size / 2),
-            color
-        )
+        sprite_index = self.point_to_index(point)
+        try:
+            sprite = self.sprites[int(sprite_index[0])][int(sprite_index[1])]
+        except IndexError:
+            return
+        sprite.scale = 1
+        sprite.color = color
 
     def draw_point_list(self, point_list: PointList, color = arcade.color.RED):
+        for x in self.sprites:
+            for y in x:
+                y.scale = 0
         for p in point_list:
             self.draw_point(p, color)
 
@@ -83,3 +103,13 @@ class Grid:
         point = Vec2(clamp(self.x_offset + self.tile_size / 2, point.x, self.max_x - self.tile_size / 2),
                      clamp(self.y_offset + self.tile_size / 2, point.y, self.max_y - self.tile_size / 2))
         return snap(point, self.tile_size, self.x_offset, self.y_offset)
+
+    def point_to_index(self, point: Vec2) -> tuple[int, int]:
+        snap = self.snap(point)
+        return (int((snap.x - self.x_offset - (self.tile_size / 2)) / self.tile_size),
+                int((snap.y - self.y_offset - (self.tile_size / 2)) / self.tile_size))
+
+    def index_to_point(self, index: tuple[int, int]) -> Vec2:
+        point = Vec2(index[0] * self.tile_size + (self.tile_size / 2) + self.x_offset,
+                     index[1] * self.tile_size + (self.tile_size / 2) + self.y_offset)
+        return point
