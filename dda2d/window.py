@@ -1,9 +1,9 @@
-from itertools import cycle
 import arcade
 from pyglet.math import Vec2
 
 from animator.lerp import ease_linear
-from dda2d.dda import Grid, dda
+from dda2d.dda import dda
+from dda2d.grid import Grid
 from common.util import load_shared_sound
 
 GRID_X_SIZE = 525
@@ -41,7 +41,7 @@ class Application(arcade.Window):
         self.sounds: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ["blip_a", "blip_c", "blip_e"]}
         self.last_played_sound = 0.0
 
-        self.ambience.play(volume = 0.5, loop = True)
+        self.ambience.play(volume = 0.33, loop = True)
 
         self.started = True
 
