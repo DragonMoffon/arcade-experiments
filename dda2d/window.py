@@ -4,7 +4,7 @@ from pyglet.math import Vec2
 from animator.lerp import ease_linear
 from dda2d.dda import dda
 from dda2d.grid import Grid
-from common.util import load_shared_sound
+from common.util import load_shared_sound, clamp
 from common.util.duration_tracker import PERF_TRACKER, perf_timed
 
 GRID_X_SIZE = 525
@@ -42,7 +42,7 @@ class Application(arcade.Window):
         self.sounds: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ["blip_a", "blip_c", "blip_e"]}
         self.last_played_sound = 0.0
 
-        self.ambience.play(volume = 0.33, loop = True)
+        self.ambience_player = self.ambience.play(volume = 0.33, loop = True)
 
         self.started = True
 
@@ -52,6 +52,10 @@ class Application(arcade.Window):
 
     def play_sound(self, s: str):
         self.sounds[s].play()
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        d_v = scroll_y / 100
+        self.ambience_player.volume = clamp(0.0, self.ambience_player.volume + d_v, 1.0)
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.started:
@@ -93,8 +97,6 @@ class Application(arcade.Window):
         self.grid.draw_point_list(self.all_points | self.point_list)
         self.grid.draw_cursor(self.cursor)
         self.text.draw()
-
-        PERF_TRACKER.print()
 
     def on_update(self, delta_time: float):
         self.local_time += delta_time

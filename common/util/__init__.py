@@ -21,6 +21,7 @@ get_shared_sound_path = make_package_path_finder(sounds, "wav")
 def load_shared_font(name: str): arcade.load_font(get_shared_font_path(name))
 def load_shared_sound(name: str): return arcade.load_sound(get_shared_sound_path(name))
 
+
 def clamp(minVal, val, maxVal):
     """Clamp a `val` to be no lower than `minVal`, and no higher than `maxVal`."""
     return max(minVal, min(maxVal, val))
