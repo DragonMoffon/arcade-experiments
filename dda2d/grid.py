@@ -5,7 +5,7 @@ from pyglet.math import Vec2
 from animator.lerp import ease_linear
 from common.util import clamp
 from common.util.procedural_animator import ProceduralAnimator, SecondOrderAnimatorBase
-from common.util.duration_tracker import perf_timed, LogSection
+from common.util.duration_tracker import perf_timed
 from dda2d.dda import PointList, snap
 
 

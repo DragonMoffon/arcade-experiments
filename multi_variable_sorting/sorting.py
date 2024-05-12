@@ -295,12 +295,18 @@ class PlotWindow(Window):
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         self.mouse_down = False
 
-    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):#
+        m_pos = self.camera.unproject((x, y))
+        c_pos = self.camera.position
+
         if scroll_y > 0:
             self.graph_size = self.graph_size * 1.1
+            self.camera.position = m_pos[0] * 1.1 + (c_pos[0] - m_pos[0]), m_pos[1] * 1.1 + (c_pos[1] - m_pos[1])
         else:
             self.graph_size = self.graph_size / 1.1
+            self.camera.position = m_pos[0] / 1.1 + (c_pos[0] - m_pos[0]), m_pos[1] / 1.1 + (c_pos[1] - m_pos[1])
         self.graph_size = max(1, self.graph_size)
+
         self.are_points_dirty = True
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):

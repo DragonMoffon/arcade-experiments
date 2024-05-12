@@ -10,6 +10,7 @@ from common.util.procedural_animator import ProceduralAnimator, SecondOrderAnima
 __all__ = (
     "get_shared_font_path",
     "get_shared_sound_path",
+    "clamp",
     "load_shared_font",
     "load_shared_sound",
     "ProceduralAnimator",
