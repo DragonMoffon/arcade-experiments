@@ -5,6 +5,7 @@ from pyglet.math import Vec2
 from animator.lerp import ease_linear
 from common.util import clamp
 from common.util.procedural_animator import ProceduralAnimator, SecondOrderAnimatorBase
+from common.util.duration_tracker import perf_timed, LogSection
 from dda2d.dda import PointList, snap
 
 
@@ -79,7 +80,8 @@ class Grid:
         self.pulse_sprite.position = self.snap(point)
         self.last_pulse_time = self.local_time
 
-    def draw(self, color = arcade.color.WHITE, line_width = 1):
+    @perf_timed
+    def draw(self, color=arcade.color.WHITE, line_width = 1):
         cur_x = self.x_offset
         cur_y = self.y_offset
 
@@ -106,14 +108,15 @@ class Grid:
             color
         )
 
-    def draw_point(self, point: Vec2):
-        sprite_index = self.point_to_index(point)
+    @perf_timed
+    def draw_point(self, point: tuple[int, int]):
         try:
-            self.sprites[int(sprite_index[0])][int(sprite_index[1])]
+            self.sprites[point[0]][point[1]]
         except IndexError:
             return
-        self.scales[int(sprite_index[0])][int(sprite_index[1])] = 1
+        self.scales[point[0]][point[1]] = 1
 
+    @perf_timed
     def draw_point_list(self, point_list: PointList):
         for x in range(self.x_len):
             for y in range(self.y_len):
@@ -136,6 +139,7 @@ class Grid:
                      index[1] * self.tile_size + (self.tile_size / 2) + self.y_offset)
         return point
 
+    @perf_timed
     def update(self, delta_time: float):
         self.local_time += delta_time
 

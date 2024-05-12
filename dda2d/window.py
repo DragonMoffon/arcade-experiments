@@ -5,6 +5,7 @@ from animator.lerp import ease_linear
 from dda2d.dda import dda
 from dda2d.grid import Grid
 from common.util import load_shared_sound
+from common.util.duration_tracker import PERF_TRACKER, perf_timed
 
 GRID_X_SIZE = 525
 GRID_Y_SIZE = 525
@@ -58,9 +59,9 @@ class Application(arcade.Window):
             if self.drawing:
                 old_point_list = self.point_list
                 self.end_point = Vec2(x, y)
-                self.point_list = set(dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
+                self.point_list = set(self.grid.point_to_index(p) for p in dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
 
-                if (old_point_list != self.point_list and self.last_played_sound + self.sounds["blip_e"].get_length() / 2 <= self.local_time):
+                if old_point_list != self.point_list and self.last_played_sound + self.sounds["blip_e"].get_length() / 2 <= self.local_time:
                     self.play_sound("blip_e")
                     self.last_played_sound = self.local_time
 
@@ -83,8 +84,8 @@ class Application(arcade.Window):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.drawing = False
             self.end_point = Vec2(x, y)
-            self.point_list = set(dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
-            self.all_points |= set(self.point_list)
+            self.point_list = set()
+            self.all_points |= set(self.grid.point_to_index(p) for p in dda(self.grid.snap(self.start_point), self.grid.snap(self.end_point)))
 
     def on_draw(self):
         self.clear()
@@ -92,6 +93,8 @@ class Application(arcade.Window):
         self.grid.draw_point_list(self.all_points | self.point_list)
         self.grid.draw_cursor(self.cursor)
         self.text.draw()
+
+        PERF_TRACKER.print()
 
     def on_update(self, delta_time: float):
         self.local_time += delta_time
