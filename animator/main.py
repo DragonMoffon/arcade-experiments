@@ -17,7 +17,7 @@ class AnimWindow(Window):
 
         self.rolling_digits = [
             RollingDigit(place = 4, font_size = 72, center_x = self.center_x - 75, center_y = self.height * 0.75),
-            RollingDigit(place = 3, font_size = 72, center_x = self.center_x - 25, center_y = self.height * 0.75),
+            RollingDigit(place = 3, font_size = 72, center_x = self.center_x - 25, center_y = self.height * 0.75, beep = True),
             RollingDigit(place = 2, font_size = 72, center_x = self.center_x + 25, center_y = self.height * 0.75),
             RollingDigit(place = 1, font_size = 72, center_x = self.center_x + 75, center_y = self.height * 0.75)
         ]
