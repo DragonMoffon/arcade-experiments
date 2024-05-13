@@ -3,7 +3,7 @@ import arcade.key
 
 from animator.animator import DragonAnimator
 from animator import lerp
-from animator.rollingdigit import RollingDigit
+from animator.rollingdigit import RollingDigitDisplay
 
 
 class AnimWindow(Window):
@@ -13,23 +13,13 @@ class AnimWindow(Window):
         self.a_b: DragonAnimator[SpriteSolidColor] = DragonAnimator(("center_x", "center_y"), lerp.ease_quadinout)
         self.sprite = self.a_b.proxy(SpriteSolidColor(100, 100, 100, self.center_y))
 
-        self.sprite_list = SpriteList()
-
-        self.rolling_digits = [
-            RollingDigit(place = 4, font_size = 72, center_x = self.center_x - 75, center_y = self.height * 0.75, rolling = False),
-            RollingDigit(place = 3, font_size = 72, center_x = self.center_x - 25, center_y = self.height * 0.75, rolling = False, beep = True),
-            RollingDigit(place = 2, font_size = 72, center_x = self.center_x + 25, center_y = self.height * 0.75, rolling = False),
-            RollingDigit(place = 1, font_size = 72, center_x = self.center_x + 75, center_y = self.height * 0.75, rolling = False)
-        ]
-
-        for rd in self.rolling_digits:
-            self.sprite_list.append(rd)
+        self.rolling_digits = RollingDigitDisplay(digits = 4, font_size = 72, center_x = self.center_x, center_y = self.height * 0.75, rolling = False, beep = 3)
 
         self.forward = False
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.R:
-            for rd in self.rolling_digits:
+            for rd in self.rolling_digits.rolling_digits:
                 rd.rolling = not rd.rolling
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
@@ -43,15 +33,14 @@ class AnimWindow(Window):
     def on_update(self, delta_time: float):
         self.a_b.update(delta_time)
 
-        for rd in self.rolling_digits:
-            rd.update(self.sprite.center_x)
+        self.rolling_digits.update(self.sprite.center_x)
 
         return super().on_update(delta_time)
 
     def on_draw(self):
         self.clear()
         self.sprite.draw()
-        self.sprite_list.draw()
+        self.rolling_digits.draw()
 
 
 def main():

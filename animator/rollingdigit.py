@@ -1,7 +1,7 @@
 import random
 
 from typing import Any
-from arcade import Sprite, Text, Texture, get_window
+from arcade import Sprite, SpriteList, Text, Texture, get_window
 
 from common.util import load_shared_sound
 
@@ -77,3 +77,28 @@ class RollingDigit(Sprite):
             self._label.draw()
             self._prev_label.draw()
             self._next_label.draw()
+
+
+class RollingDigitDisplay:
+    def __init__(self, digits: int,
+                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0, angle: float = 0,
+                 rolling = True, beep: int | None = None, **kwargs: Any) -> None:
+
+        self.sprite_list = SpriteList()
+
+        self.rolling_digits = []
+        w = font_size * 0.75  # ~approx
+        total_w = w * (digits - 1)
+        for n in range(digits, 0, -1):
+            x = center_x + (total_w / 2) - (w * (n - 1))
+            rd = RollingDigit(n, font_name = font_name, font_size = font_size, scale = scale, center_x = x, center_y = center_y,
+                              rolling = rolling, beep = beep == n)
+            self.rolling_digits.append(rd)
+            self.sprite_list.append(rd)
+
+    def update(self, total: float):
+        for rd in self.rolling_digits:
+            rd.update(total)
+
+    def draw(self):
+        self.sprite_list.draw()
