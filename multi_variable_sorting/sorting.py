@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from common.util import clamp
 import multi_variable_sorting.data as data
 from common.data_loading import make_package_string_loader
 from json import loads
@@ -305,7 +306,7 @@ class PlotWindow(Window):
         else:
             self.graph_size = self.graph_size / 1.1
             self.camera.position = m_pos[0] / 1.1 + (c_pos[0] - m_pos[0]), m_pos[1] / 1.1 + (c_pos[1] - m_pos[1])
-        self.graph_size = max(1, self.graph_size)
+        self.graph_size = clamp(1, self.graph_size, 50000)
 
         self.are_points_dirty = True
 
