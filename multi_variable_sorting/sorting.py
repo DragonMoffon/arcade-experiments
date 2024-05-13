@@ -81,7 +81,7 @@ def points_from_objects(val: float, objects: list[DigiObject]):
         yield p, d, obj
 
 
-def x_best(val: float, objects: list[DigiObject], x: int):
+def x_best(val: float, objects: list[DigiObject], x: int, int_prio = 1.0, one_prio = 1.0):
     best_dict: dict[float, list] = {
         1.0: [],
         0.5: [],
@@ -100,9 +100,9 @@ def x_best(val: float, objects: list[DigiObject], x: int):
         ratio_semi = round(ratio, 1)
         rounded_ratio = round(ratio)
 
-        intness = 2.0 * (ratio - rounded_ratio)
+        intness = 2.0 * (ratio - rounded_ratio) / int_prio
 
-        oneness = (1.0 - ratio if ratio > 1.0 else 1.0 / ratio - 1.0)
+        oneness = (1.0 - ratio if ratio > 1.0 else 1.0 / ratio - 1.0) / one_prio
 
         dist = intness ** 2 + oneness ** 2
 
@@ -221,7 +221,7 @@ class PlotWindow(Window):
 
     def create_points(self) -> PointsAndLabels:
         self.dists = tuple(points_from_objects(self.current_height, self.objects))
-        self.top_x = x_best(self.current_height, self.objects, TOP_X)
+        self.top_x = x_best(self.current_height, self.objects, TOP_X, self.int_priority, self.one_priority)
 
         for index, vals in enumerate(self.top_x):
             dist, point, obj = vals
@@ -276,9 +276,9 @@ class PlotWindow(Window):
         elif symbol == arcade.key.MINUS:
             self.dist_limit -= 0.1
         elif symbol == arcade.key.EQUAL:
-            self.camera.zoom -= 0.1
+            self.dist_limit += 0.1
         elif symbol == arcade.key.Z:
-            self.camera.zoom += 1.1
+            self.graph_size *= 1.1
         elif symbol == arcade.key.X:
             self.graph_size /= 1.1
 
