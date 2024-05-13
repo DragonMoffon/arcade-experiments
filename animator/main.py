@@ -25,9 +25,15 @@ class AnimWindow(Window):
         for rd in self.rolling_digits:
             self.sprite_list.append(rd)
 
+        self.forward = False
+
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
-        print(self.sprite.__dict__)
-        self.sprite.center_x = self.width - 100
+        if self.forward:
+            self.sprite.center_x = self.width - 100
+        else:
+            self.sprite.center_x = 100
+
+        self.forward = not self.forward
 
     def on_update(self, delta_time: float):
         self.a_b.update(delta_time)
