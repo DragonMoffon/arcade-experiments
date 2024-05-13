@@ -1,6 +1,5 @@
 import random
 
-from typing import Any
 from arcade import Sprite, SpriteList, Text, Texture, get_window
 
 from common.util import load_shared_sound
@@ -23,8 +22,8 @@ def get_digit(number: float, place: int, rolling = True) -> tuple[int, float]:
 
 class RollingDigit(Sprite):
     def __init__(self, place: int = 1,
-                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0, angle: float = 0,
-                 rolling = True, beep = False, **kwargs: Any):
+                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0,
+                 rolling = True, beep = False, **kwargs):
         self.place = place
 
         self._label = Text("0", 0, 0, font_size = font_size, font_name = font_name, anchor_y = "bottom")
@@ -50,7 +49,7 @@ class RollingDigit(Sprite):
         self.beep = beep
         self.beep_sound = load_shared_sound("blip_e")
 
-        super().__init__(self._tex, scale, center_x, center_y, angle, **kwargs)
+        super().__init__(self._tex, scale, center_x, center_y, **kwargs)
 
     def update(self, total: float):
         old_digit = self._label.text
@@ -67,26 +66,27 @@ class RollingDigit(Sprite):
 
         if self.rolling:
             self._label.y = self._tex.height * progress
+            self._prev_label.y = self._label.top
+            self._next_label.y = self._label.bottom
         else:
             self._label.y = 0
-        self._prev_label.y = self._label.top
-        self._next_label.y = self._label.bottom
 
         with self._default_atlas.render_into(self._tex) as fbo:
             fbo.clear()
             self._label.draw()
-            self._prev_label.draw()
-            self._next_label.draw()
+            if self.rolling:
+                self._prev_label.draw()
+                self._next_label.draw()
 
 
 class RollingDigitDisplay:
     def __init__(self, digits: int,
-                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0, angle: float = 0,
-                 rolling = True, beep: int | None = None, **kwargs: Any) -> None:
+                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0,
+                 rolling = True, beep: int | None = None, **kwargs):
 
         self.sprite_list = SpriteList()
 
-        self.rolling_digits = []
+        self.rolling_digits: list[RollingDigit] = []
         w = font_size * 0.75  # ~approx
         total_w = w * (digits - 1)
         for n in range(digits, 0, -1):
@@ -95,6 +95,28 @@ class RollingDigitDisplay:
                               rolling = rolling, beep = beep == n)
             self.rolling_digits.append(rd)
             self.sprite_list.append(rd)
+
+    @property
+    def rolling(self) -> bool:
+        return self.rolling_digits[0].rolling
+
+    @rolling.setter
+    def rolling(self, v):
+        for rd in self.rolling_digits:
+            rd.rolling = True
+
+    @property
+    def beep(self) -> int | None:
+        b = None
+        for rd in self.rolling_digits:
+            if rd.beep:
+                b = rd.place
+        return b
+
+    @beep.setter
+    def beep(self, v: int | None):
+        for rd in self.rolling_digits:
+            rd.beep = rd.place == v
 
     def update(self, total: float):
         for rd in self.rolling_digits:

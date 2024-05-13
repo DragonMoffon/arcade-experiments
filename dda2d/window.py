@@ -5,7 +5,7 @@ from animator.lerp import ease_linear
 from dda2d.dda import dda
 from dda2d.grid import Grid
 from common.util import load_shared_sound, clamp
-from common.util.duration_tracker import PERF_TRACKER, perf_timed
+# from common.util.duration_tracker import PERF_TRACKER, perf_timed
 
 GRID_X_SIZE = 525
 GRID_Y_SIZE = 525

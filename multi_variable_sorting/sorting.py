@@ -296,7 +296,7 @@ class PlotWindow(Window):
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         self.mouse_down = False
 
-    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):#
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         m_pos = self.camera.unproject((x, y))
         c_pos = self.camera.position
 

@@ -1,4 +1,4 @@
-from arcade import SpriteList, SpriteSolidColor, Window
+from arcade import SpriteSolidColor, Window
 import arcade.key
 
 from animator.animator import DragonAnimator
@@ -19,8 +19,7 @@ class AnimWindow(Window):
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.R:
-            for rd in self.rolling_digits.rolling_digits:
-                rd.rolling = not rd.rolling
+            self.rolling_digits.rolling = not self.rolling_digits.rolling
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if self.forward:
@@ -32,7 +31,6 @@ class AnimWindow(Window):
 
     def on_update(self, delta_time: float):
         self.a_b.update(delta_time)
-
         self.rolling_digits.update(self.sprite.center_x)
 
         return super().on_update(delta_time)
