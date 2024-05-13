@@ -8,7 +8,7 @@ FONT_NAME = "GohuFont 11 Nerd Font Mono"
 
 def get_digit(number: float, place: int) -> tuple[int, float]:
     i = number % (10 ** place) // (10 ** (place - 1))
-    f = (number % (10 ** place - 1) / (10 ** (place))) % 1.0
+    f = (number % (10 ** (place - 1)) / (10 ** (place))) % 1.0
     return i, f
 
 
