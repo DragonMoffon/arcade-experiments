@@ -22,7 +22,7 @@ SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
 JSON_NAME = "objects"
 POINT_SIZE = 2
-FONT_NAME = "bahnschrift"
+FONT_NAME = "GohuFont 11 Nerd Font Mono"
 SELECTED_CHOICES = 10
 BEST_X = 10
 TOP_X = 30
@@ -319,11 +319,11 @@ class PlotWindow(Window):
             self.create_points()
 
         self.camera.use()
-        self.clear(arcade.color.GRAY_BLUE)
+        self.clear()
 
         # Draw plot
-        arcade.draw_line(-self.width, 0, self.width, 0, arcade.color.GRAY)
-        arcade.draw_line(0, -self.height, 0, self.height, arcade.color.GRAY)
+        arcade.draw_line(-self.width * self.graph_size + self.camera.position[0], 0, self.width * self.graph_size + self.camera.position[0], 0, arcade.color.GRAY)
+        arcade.draw_line(0, -self.height * self.graph_size + self.camera.position[1], 0, self.height * self.graph_size + self.camera.position[1], arcade.color.GRAY)
         points = [(p[0] * self.graph_size, p[1] * self.graph_size) for p, _, _ in self.dists]
 
         # Draw points
