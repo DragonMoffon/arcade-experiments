@@ -66,7 +66,7 @@ def cast_or_none(obj, t: Type[T]) -> T | None:
 #     return sorted(li, key=lambda x: x[1])
 
 
-def points_from_objects(val: float, objects: list[DigiObject]):
+def points_from_objects(val: float, objects: list[DigiObject], int_prio = 1.0, one_prio = 1.0):
     for obj in objects:
         ratio = val / obj.unitlength
         rounded_ratio = round(ratio)
@@ -75,7 +75,7 @@ def points_from_objects(val: float, objects: list[DigiObject]):
         oneness = (1.0-ratio if ratio > 1 else 1.0/ratio - 1.0)
         oneness = math.copysign(oneness**2 / 25.0, oneness)
 
-        p = oneness, intness
+        p = oneness / one_prio, intness / int_prio
         d = oneness**2 + intness**2
 
         yield p, d, obj
@@ -220,7 +220,7 @@ class PlotWindow(Window):
         return objs
 
     def create_points(self) -> PointsAndLabels:
-        self.dists = tuple(points_from_objects(self.current_height, self.objects))
+        self.dists = tuple(points_from_objects(self.current_height, self.objects, self.int_priority, self.one_priority))
         self.top_x = x_best(self.current_height, self.objects, TOP_X, self.int_priority, self.one_priority)
 
         for index, vals in enumerate(self.top_x):
