@@ -23,15 +23,15 @@ def get_digit(number: float, place: int, rolling = True) -> tuple[int, float]:
 
 class RollingDigit(Sprite):
     def __init__(self, place: int = 1,
-                 *, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0, angle: float = 0,
+                 *, font_name: str = FONT_NAME, font_size: int = 22, scale: float = 1, center_x: float = 0, center_y: float = 0, angle: float = 0,
                  rolling = True, beep = False, **kwargs: Any):
         self.place = place
 
-        self._label = Text("0", 0, 0, font_size = font_size, font_name = FONT_NAME, anchor_y = "bottom")
+        self._label = Text("0", 0, 0, font_size = font_size, font_name = font_name, anchor_y = "bottom")
 
         # These don't get used unless rolling is True
-        self._prev_label = Text("0", 0, 0, font_size = font_size, font_name = FONT_NAME, anchor_y = "bottom")
-        self._next_label = Text("0", 0, 0, font_size = font_size, font_name = FONT_NAME, anchor_y = "top")
+        self._prev_label = Text("0", 0, 0, font_size = font_size, font_name = font_name, anchor_y = "bottom")
+        self._next_label = Text("0", 0, 0, font_size = font_size, font_name = font_name, anchor_y = "top")
 
         self._default_atlas = get_window().ctx.default_atlas
 
