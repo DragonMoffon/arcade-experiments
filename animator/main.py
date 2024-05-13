@@ -1,5 +1,5 @@
-from arcade import SpriteList, Window
-from arcade import SpriteSolidColor
+from arcade import SpriteList, SpriteSolidColor, Window
+import arcade.key
 
 from animator.animator import DragonAnimator
 from animator import lerp
@@ -16,16 +16,21 @@ class AnimWindow(Window):
         self.sprite_list = SpriteList()
 
         self.rolling_digits = [
-            RollingDigit(place = 4, font_size = 72, center_x = self.center_x - 75, center_y = self.height * 0.75),
-            RollingDigit(place = 3, font_size = 72, center_x = self.center_x - 25, center_y = self.height * 0.75, beep = True),
-            RollingDigit(place = 2, font_size = 72, center_x = self.center_x + 25, center_y = self.height * 0.75),
-            RollingDigit(place = 1, font_size = 72, center_x = self.center_x + 75, center_y = self.height * 0.75)
+            RollingDigit(place = 4, font_size = 72, center_x = self.center_x - 75, center_y = self.height * 0.75, rolling = False),
+            RollingDigit(place = 3, font_size = 72, center_x = self.center_x - 25, center_y = self.height * 0.75, rolling = False, beep = True),
+            RollingDigit(place = 2, font_size = 72, center_x = self.center_x + 25, center_y = self.height * 0.75, rolling = False),
+            RollingDigit(place = 1, font_size = 72, center_x = self.center_x + 75, center_y = self.height * 0.75, rolling = False)
         ]
 
         for rd in self.rolling_digits:
             self.sprite_list.append(rd)
 
         self.forward = False
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.R:
+            for rd in self.rolling_digits:
+                rd.rolling = not rd.rolling
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if self.forward:
