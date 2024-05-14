@@ -23,6 +23,8 @@ class AnimWindow(Window):
             self.rolling_digits.rolling = not self.rolling_digits.rolling
         elif symbol == arcade.key.M:
             self.mouseing = not self.mouseing
+        elif symbol == arcade.key.SPACE or symbol == arcade.key.ENTER:
+            self.forward = not self.forward
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self.mouseing:
