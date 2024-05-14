@@ -16,10 +16,17 @@ class AnimWindow(Window):
         self.rolling_digits = RollingDigitDisplay(digits = 4, font_size = 72, center_x = self.center_x, center_y = self.height * 0.75, rolling = True, beep = 3)
 
         self.forward = False
+        self.mouseing = False
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.R:
             self.rolling_digits.rolling = not self.rolling_digits.rolling
+        elif symbol == arcade.key.M:
+            self.mouseing = not self.mouseing
+
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
+        if self.mouseing:
+            self.sprite.center_x = x
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if self.forward:
