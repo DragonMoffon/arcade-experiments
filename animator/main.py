@@ -13,7 +13,7 @@ class AnimWindow(Window):
         self.a_b: DragonAnimator[SpriteSolidColor] = DragonAnimator(("center_x", "center_y"), lerp.ease_quadinout)
         self.sprite = self.a_b.proxy(SpriteSolidColor(100, 100, 100, self.center_y))
 
-        self.rolling_digits = RollingDigitDisplay(digits = 4, font_size = 72, center_x = self.center_x, center_y = self.height * 0.75, rolling = False, beep = 3)
+        self.rolling_digits = RollingDigitDisplay(digits = 4, font_size = 72, center_x = self.center_x, center_y = self.height * 0.75, rolling = True, beep = 3)
 
         self.forward = False
 

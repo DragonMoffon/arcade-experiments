@@ -46,8 +46,14 @@ class RollingDigit(Sprite):
 
         self.rolling = rolling
 
+        self._progress = 0.0
+
         self.beep = beep
         self.beep_sound = load_shared_sound("blip_e")
+
+        self.prev_total = 0
+
+        self.settling = False
 
         super().__init__(self._tex, scale, center_x, center_y, **kwargs)
 
@@ -57,6 +63,14 @@ class RollingDigit(Sprite):
         current, progress = get_digit(total, self.place, self.rolling)
         pre, nex = current - 1 % 10, current + 1 % 10
 
+        self.settling = total == self.prev_total
+
+        if self.settling:
+            self._progress /= 1.1
+            self._progress = 0 if self._progress < 0.001 else self._progress
+        else:
+            self._progress = progress
+
         self._label.text = str(current)
         self._prev_label.text = str(pre)
         self._next_label.text = str(nex)
@@ -65,7 +79,7 @@ class RollingDigit(Sprite):
             self.beep_sound.play()
 
         if self.rolling:
-            self._label.y = self._tex.height * progress
+            self._label.y = self._tex.height * self._progress
             self._prev_label.y = self._label.top
             self._next_label.y = self._label.bottom
         else:
@@ -77,6 +91,8 @@ class RollingDigit(Sprite):
             if self.rolling:
                 self._prev_label.draw()
                 self._next_label.draw()
+
+        self.prev_total = total
 
 
 class RollingDigitDisplay:
@@ -103,7 +119,7 @@ class RollingDigitDisplay:
     @rolling.setter
     def rolling(self, v):
         for rd in self.rolling_digits:
-            rd.rolling = True
+            rd.rolling = v
 
     @property
     def beep(self) -> int | None:
