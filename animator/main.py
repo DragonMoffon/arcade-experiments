@@ -40,7 +40,7 @@ class AnimWindow(Window):
 
     def on_update(self, delta_time: float):
         self.a_b.update(delta_time)
-        self.rolling_digits.update(self.sprite.center_x)
+        self.rolling_digits.update(delta_time, self.sprite.center_x)
 
         return super().on_update(delta_time)
 

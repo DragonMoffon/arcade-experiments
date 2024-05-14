@@ -57,7 +57,7 @@ class RollingDigit(Sprite):
 
         super().__init__(self._tex, scale, center_x, center_y, **kwargs)
 
-    def update(self, total: float):
+    def update(self, delta_time: float, total: float):
         old_digit = self._label.text
 
         current, progress = get_digit(total, self.place, self.rolling)
@@ -66,7 +66,7 @@ class RollingDigit(Sprite):
         self.settling = total == self.prev_total
 
         if self.settling:
-            self._progress /= 1.1
+            self._progress /= 1.1 * (delta_time * 60)
             self._progress = 0 if self._progress < 0.001 else self._progress
         else:
             self._progress = progress
@@ -134,9 +134,9 @@ class RollingDigitDisplay:
         for rd in self.rolling_digits:
             rd.beep = rd.place == v
 
-    def update(self, total: float):
+    def update(self, delta_time: float, total: float):
         for rd in self.rolling_digits:
-            rd.update(total)
+            rd.update(delta_time, total)
 
     def draw(self):
         self.sprite_list.draw()
