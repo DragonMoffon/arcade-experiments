@@ -20,8 +20,8 @@ class App(Window):
         self._projection_data = camera.PerspectiveProjectionData(
             self.width / self.height,
             90,
-            0.01,
-            1000.0,
+            100.0,
+            10000.0,
             self.ctx.viewport
         )
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
@@ -32,9 +32,21 @@ class App(Window):
 
         self._lat = 0
         self._long = 0
-        self._radius = 0
+        self._radius = 7500
+
+        self.look_at_center()
 
         self._is_in_center_view_mode = True
+
+    def look_at_center(self):
+        y = math.sin(self._lat)
+        x = math.cos(-self._long) * math.cos(self._lat)
+        z = math.sin(-self._long) * math.cos(self._lat)
+        forward = (-x, -y, -z)
+        pos = (x * self._radius, y * self._radius, z * self._radius)
+
+        self._camera_data.position = pos
+        self._camera_data.forward = forward
 
     def on_key_press(self, symbol: int, modifiers: int):
         match symbol:
@@ -74,7 +86,7 @@ class App(Window):
     def on_update(self, delta_time: float):
         if self._is_in_center_view_mode:
             if self.vertical:
-                self._radius = clamp(210, self._radius + self.vertical * 100.0 * delta_time, 1000.0)
+                self._radius = clamp(7000, self._radius + self.vertical * 1000.0 * delta_time, 10000)
 
             if self.horizontal:
                 self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
@@ -83,16 +95,7 @@ class App(Window):
                 self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
 
             if self.forward or self.horizontal or self.vertical:
-                y = math.sin(self._lat)
-                x = math.cos(-self._long) * math.cos(self._lat)
-                z = math.sin(-self._long) * math.cos(self._lat)
-                forward = (-x, -y, -z)
-                pos = (x * self._radius, y * self._radius, z * self._radius)
-
-                self._camera_data.position = pos
-                self._camera_data.forward = forward
-
-                print(pos, forward)
+                self.look_at_center()
 
         else:
             if self.forward:
