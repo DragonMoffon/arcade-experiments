@@ -1,0 +1,84 @@
+from arcade import Window, camera, key
+from pyglet.math import Vec2
+
+from sphere.render import Renderer
+
+
+class App(Window):
+
+    def __init__(self):
+        super().__init__(1280, 720, "3D Sphere")
+
+        self._renderer = Renderer()
+        self._camera_data = camera.CameraData(
+            position=(0.0, 0.0, 0.0)
+        )
+        self._projection_data = camera.PerspectiveProjectionData(
+            self.width / self.height,
+            90,
+            0.01,
+            1000.0,
+            self.ctx.viewport
+        )
+        self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
+
+        self.forward = 0
+        self.horizontal = 0
+        self.vertical = 0
+
+        self._lat = 0
+        self._long = 0
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        match symbol:
+            case key.W:
+                self.forward += 1
+            case key.S:
+                self.forward -= 1
+            case key.D:
+                self.horizontal += 1
+            case key.A:
+                self.horizontal -= 1
+            case key.SPACE:
+                self.vertical += 1
+            case key.LSHIFT:
+                self.vertical -= 1
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        match symbol:
+            case key.W:
+                self.forward -= 1
+            case key.S:
+                self.forward += 1
+            case key.D:
+                self.horizontal -= 1
+            case key.A:
+                self.horizontal += 1
+            case key.SPACE:
+                self.vertical -= 1
+            case key.LSHIFT:
+                self.vertical += 1
+
+    def on_draw(self):
+        self.clear()
+        with self._camera.activate():
+            self._renderer.draw()
+
+    def on_update(self, delta_time: float):
+        if self.forward:
+            velocity = self.forward * 100.0 * delta_time
+            old_pos = self._camera_data.position
+            fwd = self._camera_data.forward
+
+            new_pos = old_pos[0] + fwd[0] * velocity, old_pos[1] + fwd[1] * velocity, old_pos[2] + fwd[2] * velocity
+            self._camera_data.position = new_pos
+
+        if self.horizontal or self.vertical:
+            direction = Vec2(self.horizontal, self.vertical).normalize()
+            new_pos = camera.grips.strafe(self._camera_data, direction)
+            self._camera_data.position = new_pos
+
+
+def main():
+    app = App()
+    app.run()
