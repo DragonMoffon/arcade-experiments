@@ -14,7 +14,9 @@ out vec3 vs_normal;
 out vec2 vs_uv;
 
 void main(){
-    gl_Position = window.projection * window.view * vec4(in_position, 1.0);
-    vs_normal = in_normal;
+    mat4 mvp = window.projection * window.view;
+
+    gl_Position = mvp * vec4(in_position, 1.0);
+    vs_normal = (mvp * vec4(in_normal, 0.0)).xyz;
     vs_uv = in_uv;
 }

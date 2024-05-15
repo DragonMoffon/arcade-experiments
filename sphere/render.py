@@ -15,12 +15,12 @@ class Renderer:
     def __init__(self):
         self._ctx = ctx = get_window().ctx
 
-        self._sphere = gl.geometry.sphere(200.0)
+        self._sphere = gl.geometry.sphere(200.0, 64, 64)
         self._texture_program = ctx.program(
             vertex_shader=get_shader_string("sphere_texture_vs"),
             fragment_shader=get_shader_string("sphere_texture_fs")
         )
-        img = Image.open(get_img_path("world_oct"))
+        img = Image.open(get_img_path("world_topo_bathy_oct"))
         self._world_texture = ctx.texture((5400, 2700), components=3, data=img.tobytes())
 
     def draw(self):
