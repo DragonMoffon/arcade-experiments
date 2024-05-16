@@ -2,8 +2,9 @@ import math
 
 from arcade import Window, camera, key
 from pyglet.math import Vec2, Vec3
+from pyglet import model
 
-from common.util import clamp
+from common.util import clamp, load_shared_model
 
 from sphere.render import Renderer
 
@@ -41,6 +42,8 @@ class App(Window):
         self.look_at_center()
 
         self._is_in_center_view_mode = True
+
+        self.person = load_shared_model("person")
 
     def look_at_center(self):
         y = math.sin(self._lat)
@@ -90,6 +93,8 @@ class App(Window):
         with self._camera_2.activate():
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
+
+        self.person.draw()
 
     def on_update(self, delta_time: float):
         if self._is_in_center_view_mode:
