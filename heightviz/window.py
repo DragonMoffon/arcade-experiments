@@ -1,8 +1,7 @@
 import math
 
 from arcade import Window, camera, key
-from pyglet.math import Vec2, Vec3
-from pyglet import model
+from pyglet.math import Vec2
 
 from common.util import clamp, load_shared_model
 
