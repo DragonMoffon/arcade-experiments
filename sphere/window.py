@@ -21,7 +21,7 @@ class App(Window):
             self.width / self.height,
             90,
             100.0,
-            10000.0,
+            20000.0,
             self.ctx.viewport
         )
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)

@@ -27,9 +27,21 @@ class Renderer:
         img = Image.open(get_img_path("world_norm"))
         self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes())
 
+        self._star_sphere = gl.geometry.sphere(10000)
+        self._star_texture_program = ctx.program(
+            vertex_shader=get_shader_string("blank_sphere_texture_vs"),
+            fragment_shader=get_shader_string("blank_sphere_texture_fs")
+        )
+        img = Image.open(get_img_path("stars"))
+        self._star_texture = ctx.texture(img.size, components=1, data=img.tobytes())
+
     def draw(self):
         self._ctx.disable(self._ctx.CULL_FACE)
         self._ctx.enable(self._ctx.DEPTH_TEST)
+
+        self._star_texture.use(0)
+        self._star_sphere.render(self._star_texture_program)
+
         self._world_texture.use(0)
         self._elev_texture.use(1)
         self._sphere.render(self._texture_program)
