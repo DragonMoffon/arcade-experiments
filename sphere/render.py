@@ -1,4 +1,6 @@
+from array import array
 from PIL import Image
+from math import radians
 
 from arcade import gl
 from arcade import get_window
@@ -27,13 +29,20 @@ class Renderer:
         img = Image.open(get_img_path("world_bump"))
         self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes(), wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
 
-        self._star_sphere = gl.geometry.sphere(25000, 64, 64)
-        self._star_texture_program = ctx.program(
+        self._ring_sphere = gl.geometry.sphere(6380, 1024, 1024)
+        self._ring_program = ctx.program(
             vertex_shader=get_shader_string("blank_sphere_texture_vs"),
-            fragment_shader=get_shader_string("blank_sphere_texture_fs")
+            fragment_shader=get_shader_string("sphere_circle_fs")
         )
-        img = Image.open(get_img_path("stars"))
-        self._star_texture = ctx.texture(img.size, components=1, data=img.tobytes())
+        self._ring_program['line_width'] = radians(2.0)
+        self._ring_program['error_transparency'] = 0.2
+        self._rings = ctx.buffer(
+            data=array('f', (
+                radians(174.704), radians(-41.309), radians(31.39), 0.05,  # First Ring (SNZO)
+                radians(119.7531), radians(-21.159), radians(41.02), 0.05,  # Second Ring (MBWA)
+                radians(110.5354), radians(-66.2792), radians(65.9), 0.05  # Third Ring (CASY)
+            ))
+        )
 
     def draw(self):
         self._ctx.disable(self._ctx.CULL_FACE)
@@ -43,6 +52,5 @@ class Renderer:
         self._elev_texture.use(1)
         self._sphere.render(self._texture_program)
 
-    def star_draw(self):
-        self._star_texture.use(0)
-        self._star_sphere.render(self._star_texture_program)
+        self._rings.bind_to_storage_buffer()
+        self._ring_sphere.render(self._ring_program)

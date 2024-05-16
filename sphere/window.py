@@ -47,8 +47,6 @@ class App(Window):
 
         self.look_at_center()
 
-        self._is_in_center_view_mode = True
-
     def look_at_center(self):
         y = math.sin(self._lat)
         x = math.cos(-self._long) * math.cos(self._lat)
@@ -91,39 +89,23 @@ class App(Window):
 
     def on_draw(self):
         self.clear()
-
         with self._camera_2.activate():
-            self._renderer.star_draw()
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
 
     def on_update(self, delta_time: float):
-        if self._is_in_center_view_mode:
-            if self.vertical:
-                self._radius = clamp(7000, self._radius + self.vertical * 1000.0 * delta_time, 10000)
+        if self.vertical:
+            self._radius = clamp(7000, self._radius + self.vertical * 1000.0 * delta_time, 10000)
 
-            if self.horizontal:
-                self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
+        if self.horizontal:
+            self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
 
-            if self.forward:
-                self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
+        if self.forward:
+            self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
 
-            if self.forward or self.horizontal or self.vertical:
-                self.look_at_center()
+        if self.forward or self.horizontal or self.vertical:
+            self.look_at_center()
 
-        else:
-            if self.forward:
-                velocity = self.forward * 100.0 * delta_time
-                old_pos = self._camera_data.position
-                fwd = self._camera_data.forward
-
-                new_pos = old_pos[0] + fwd[0] * velocity, old_pos[1] + fwd[1] * velocity, old_pos[2] + fwd[2] * velocity
-                self._camera_data.position = new_pos
-
-            if self.horizontal or self.vertical:
-                direction = Vec2(self.horizontal, self.vertical).normalize()
-                new_pos = camera.grips.strafe(self._camera_data, direction)
-                self._camera_data.position = new_pos
 
 
 def main():
