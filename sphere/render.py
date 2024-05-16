@@ -15,7 +15,7 @@ class Renderer:
     def __init__(self):
         self._ctx = ctx = get_window().ctx
 
-        self._sphere = gl.geometry.sphere(6371, 1024, 1024)
+        self._sphere = gl.geometry.sphere(360, 1024, 1024)
         self._texture_program = ctx.program(
             vertex_shader=get_shader_string("sphere_texture_vs"),
             fragment_shader=get_shader_string("sphere_texture_fs")
@@ -24,10 +24,10 @@ class Renderer:
         self._texture_program["elevText"] = 1
         img = Image.open(get_img_path("world_oct"))
         self._world_texture = ctx.texture(img.size, components=3, data=img.tobytes())
-        img = Image.open(get_img_path("world_norm"))
+        img = Image.open(get_img_path("world_bump"))
         self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes())
 
-        self._star_sphere = gl.geometry.sphere(10000)
+        self._star_sphere = gl.geometry.sphere(20000, 64, 64)
         self._star_texture_program = ctx.program(
             vertex_shader=get_shader_string("blank_sphere_texture_vs"),
             fragment_shader=get_shader_string("blank_sphere_texture_fs")
@@ -39,9 +39,10 @@ class Renderer:
         self._ctx.disable(self._ctx.CULL_FACE)
         self._ctx.enable(self._ctx.DEPTH_TEST)
 
-        self._star_texture.use(0)
-        self._star_sphere.render(self._star_texture_program)
-
         self._world_texture.use(0)
         self._elev_texture.use(1)
         self._sphere.render(self._texture_program)
+
+    def star_draw(self):
+        self._star_texture.use(0)
+        self._star_sphere.render(self._star_texture_program)

@@ -1,7 +1,5 @@
 #version 330
 
-
-
 uniform WindowBlock {
     mat4 projection;
     mat4 view;
@@ -20,8 +18,8 @@ out vec2 vs_uv;
 void main(){
     mat4 mvp = window.projection * window.view;
 
-    vec3 height = texture(elevText, in_uv).a * 88.49 * in_normal;
+    vec3 height = texture(elevText, in_uv).a * 8.849 * in_normal;
     gl_Position = mvp * vec4(in_position + height, 1.0);
-    vs_normal = (mvp * vec4(in_normal, 0.0)).xyz;
+    vs_normal = in_normal;
     vs_uv = in_uv;
 }

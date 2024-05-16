@@ -24,7 +24,11 @@ class App(Window):
             20000.0,
             self.ctx.viewport
         )
+
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
+        self._camera_2 = camera.OrthographicProjector(view=self._camera_data)
+        self._camera_2.projection.near = 0.01
+        self._camera_2.projection.far = 200000.0
 
         self.forward = 0
         self.horizontal = 0
@@ -81,6 +85,10 @@ class App(Window):
     def on_draw(self):
         self.clear()
         with self._camera.activate():
+            self._renderer.star_draw()
+
+        with self._camera_2.activate():
+            self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
 
     def on_update(self, delta_time: float):
