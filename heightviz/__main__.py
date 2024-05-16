@@ -1,4 +1,4 @@
-from sphere.window import main
+from heightviz.window import main
 
 
 if __name__ == '__main__':

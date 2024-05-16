@@ -23,9 +23,9 @@ class Renderer:
         self._texture_program["wrldText"] = 0
         self._texture_program["elevText"] = 1
         img = Image.open(get_img_path("world_blend_oct"))
-        self._world_texture = ctx.texture(img.size, components=4, data=img.tobytes())
+        self._world_texture = ctx.texture(img.size, components=4, data=img.tobytes(), wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
         img = Image.open(get_img_path("world_bump"))
-        self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes())
+        self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes(), wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
 
         self._star_sphere = gl.geometry.sphere(25000, 64, 64)
         self._star_texture_program = ctx.program(

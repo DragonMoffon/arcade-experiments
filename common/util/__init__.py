@@ -26,7 +26,7 @@ get_shared_sound_path = make_package_path_finder(sounds, "wav")
 get_shared_model_path = make_package_path_finder(models, "obj")
 def load_shared_font(name: str): arcade.load_font(get_shared_font_path(name))
 def load_shared_sound(name: str): return arcade.load_sound(get_shared_sound_path(name))
-def load_shared_model(name: str): return pyglet.model.load(get_shared_model_path(name))
+def load_shared_model(name: str) -> pyglet.model.Model: return pyglet.model.load(get_shared_model_path(name))
 
 
 def clamp(minVal, val, maxVal):
