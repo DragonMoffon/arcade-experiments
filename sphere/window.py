@@ -24,9 +24,16 @@ class App(Window):
             20000.0,
             self.ctx.viewport
         )
+        self._orthographic_data = camera.OrthographicProjectionData(
+            -7000 * self._projection_data.aspect, 7000 * self._projection_data.aspect,
+            -7000, 7000,
+            100.0,
+            20000.0,
+            self.ctx.viewport
+        )
 
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
-        self._camera_2 = camera.OrthographicProjector(view=self._camera_data)
+        self._camera_2 = camera.OrthographicProjector(view=self._camera_data, projection=self._orthographic_data)
         self._camera_2.projection.near = 0.01
         self._camera_2.projection.far = 200000.0
 
@@ -84,10 +91,9 @@ class App(Window):
 
     def on_draw(self):
         self.clear()
-        with self._camera.activate():
-            self._renderer.star_draw()
 
         with self._camera_2.activate():
+            self._renderer.star_draw()
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
 

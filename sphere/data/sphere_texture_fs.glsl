@@ -23,6 +23,6 @@ void main(){
 
     vec3 norm = 2 * texture(elevText, vs_uv).rgb - 1;
     vec3 normal = right * norm.x + up * norm.y + forward * norm.z;
-    float lighting = clamp(dot(normal, light), 0.0, 1.0);
+    float lighting = clamp(dot(normal, light) + 0.2, 0.0, 1.0);
     fs_colour = vec4(lighting * albedo.xyz, 1.0);
 }
