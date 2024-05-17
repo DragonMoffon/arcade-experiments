@@ -1,7 +1,7 @@
 import math
 
 from arcade import Window, camera, key
-from pyglet.math import Vec2, Vec3
+from pyglet.math import Vec2
 
 from common.util import clamp
 
@@ -21,10 +21,21 @@ class App(Window):
             self.width / self.height,
             90,
             100.0,
-            10000.0,
+            20000.0,
             self.ctx.viewport
         )
+        self._orthographic_data = camera.OrthographicProjectionData(
+            -7000 * self._projection_data.aspect, 7000 * self._projection_data.aspect,
+            -7000, 7000,
+            100.0,
+            20000.0,
+            self.ctx.viewport
+        )
+
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
+        self._camera_2 = camera.OrthographicProjector(view=self._camera_data, projection=self._orthographic_data)
+        self._camera_2.projection.near = 0.01
+        self._camera_2.projection.far = 200000.0
 
         self.forward = 0
         self.horizontal = 0
@@ -35,8 +46,6 @@ class App(Window):
         self._radius = 7500
 
         self.look_at_center()
-
-        self._is_in_center_view_mode = True
 
     def look_at_center(self):
         y = math.sin(self._lat)
@@ -80,36 +89,23 @@ class App(Window):
 
     def on_draw(self):
         self.clear()
-        with self._camera.activate():
+        with self._camera_2.activate():
+            self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
 
     def on_update(self, delta_time: float):
-        if self._is_in_center_view_mode:
-            if self.vertical:
-                self._radius = clamp(7000, self._radius + self.vertical * 1000.0 * delta_time, 10000)
+        if self.vertical:
+            self._radius = clamp(7000, self._radius + self.vertical * 1000.0 * delta_time, 10000)
 
-            if self.horizontal:
-                self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
+        if self.horizontal:
+            self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
 
-            if self.forward:
-                self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
+        if self.forward:
+            self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
 
-            if self.forward or self.horizontal or self.vertical:
-                self.look_at_center()
+        if self.forward or self.horizontal or self.vertical:
+            self.look_at_center()
 
-        else:
-            if self.forward:
-                velocity = self.forward * 100.0 * delta_time
-                old_pos = self._camera_data.position
-                fwd = self._camera_data.forward
-
-                new_pos = old_pos[0] + fwd[0] * velocity, old_pos[1] + fwd[1] * velocity, old_pos[2] + fwd[2] * velocity
-                self._camera_data.position = new_pos
-
-            if self.horizontal or self.vertical:
-                direction = Vec2(self.horizontal, self.vertical).normalize()
-                new_pos = camera.grips.strafe(self._camera_data, direction)
-                self._camera_data.position = new_pos
 
 
 def main():
