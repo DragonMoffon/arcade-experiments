@@ -1,6 +1,6 @@
 import math
 
-from arcade import Window, camera, key
+from arcade import Text, Window, camera, key
 from pyglet.math import Vec2, Vec3
 
 from common.util import clamp
@@ -43,6 +43,8 @@ class App(Window):
         self._camera_2.projection.near = 0.01
         self._camera_2.projection.far = 200000.0
 
+        self._gui_cam = camera.Camera2D()
+
         self.forward = 0
         self.horizontal = 0
         self.vertical = 0
@@ -54,9 +56,14 @@ class App(Window):
         self._long = 0
         self._radius = 7500
 
-        self.look_at_center()
+        self.person_scale = 48
+        self.text = Text(f"{self.person_scale}km",
+                         5, self.height - 5,
+                         font_name="GohuFont 11 Nerd Font Mono", font_size=36,
+                         anchor_x = "left", anchor_y = "top")
 
         self._is_in_center_view_mode = True
+        self.look_at_center()
 
     def look_at_center(self):
         y = math.sin(self._lat)
@@ -74,6 +81,11 @@ class App(Window):
         self._camera_data.up = up.x, up.y, up.z
 
         self._person.set_world_coord(self._lat, self._long)
+
+    def scale_person(self):
+        self._person._scale = Vec3(self.person_scale / 1.7, self.person_scale / 1.7, self.person_scale / 1.7)
+        self._person.update_model_matrix()
+        self.text.text = f"{self.person_scale}km"
 
     def on_key_press(self, symbol: int, modifiers: int):
         match symbol:
@@ -100,6 +112,19 @@ class App(Window):
                 self.vertical += 1
             case key.LSHIFT:
                 self.vertical -= 1
+            case key.NUM_ADD:
+                if modifiers & key.MOD_SHIFT:
+                    self.person_scale += 10
+                else:
+                    self.person_scale += 1
+                self.scale_person()
+            case key.NUM_SUBTRACT:
+                if modifiers & key.MOD_SHIFT:
+                    self.person_scale -= 10
+                else:
+                    self.person_scale -= 1
+                self.person_scale = max(1, self.person_scale)
+                self.scale_person()
 
     def on_key_release(self, symbol: int, modifiers: int):
         match symbol:
@@ -145,10 +170,12 @@ class App(Window):
         cam = self._camera_2 if self._is_in_center_view_mode else self._camera
 
         with cam.activate():
-            self._renderer.star_draw()
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
             self._person.draw()
+
+        with self._gui_cam.activate():
+            self.text.draw()
 
     def on_update(self, delta_time: float):
         if self._is_in_center_view_mode:

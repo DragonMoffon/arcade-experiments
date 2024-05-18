@@ -16,7 +16,7 @@ class PersonRenderer:
         self._position: Vec3 = Vec3(0.0, 6371.0, 0.0)
         self._rotation: Vec3 = Vec3(0.0, 1.0, 0.0)
         self._angle: float = 0.0
-        self._scale: Vec3 = Vec3(48.0, 48.0, 48.0)
+        self._scale: Vec3 = Vec3(48.0 / 1.7, 48.0 / 1.7, 48.0 / 1.7)
 
         self._dirty = True
 
