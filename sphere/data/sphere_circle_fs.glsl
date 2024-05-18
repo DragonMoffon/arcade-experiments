@@ -17,7 +17,9 @@ out vec4 fs_colour;
 
 
 float angular_distance(vec2 a, vec2 b){
-    return acos( sin(a.x) * sin(b.x) + cos(a.x) * cos(b.x) * cos(a.y - b.y));
+    vec3 primary = vec3(cos(a.x) * cos(a.y), sin(a.y), sin(a.x) * cos(a.y));
+    vec3 secondary = vec3(cos(b.x) * cos(b.y), sin(b.y), sin(b.x) * cos(b.y));
+    return acos(dot(primary, secondary));
 }
 
 float ring_error_sdf(vec4 ring, vec2 a){
@@ -41,7 +43,7 @@ void main(){
 
     float error = 0.0;
     bool is_on_line = false;
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < rings.length(); i++){
         vec4 ring = rings[i];
         float e_d = ring_error_sdf(ring, coord);
         if (e_d <= 0.0) error += error_transparency;
