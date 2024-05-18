@@ -1,12 +1,16 @@
 import math
 
-from arcade import Window, camera, key
+from arcade import SpriteList, Window, camera, key, Sprite
 from arcade.draw_commands import get_image
-from pyglet.math import Vec2
 
+from common.data_loading import make_package_path_finder
 from common.util import clamp
 
 from sphere.render import Renderer
+import sphere.data as data
+
+
+get_img_path = make_package_path_finder(data, "png")
 
 
 class App(Window):
@@ -45,6 +49,37 @@ class App(Window):
         self._lat = 0
         self._long = 0
         self._radius = 7500
+
+        self.stars = SpriteList()
+
+        # Northeast stars
+        self.stars_ne = Sprite(get_img_path("stars"))
+        self.stars_ne.bottom = self.center_y
+        self.stars_ne.left = self.center_x
+        self.stars.append(self.stars_ne)
+
+        # Northwest stars
+        self.stars_nw = Sprite(get_img_path("stars"))
+        self.stars_nw.bottom = self.center_y
+        self.stars_nw.right = self.center_x
+        self.stars.append(self.stars_nw)
+
+        # Southeast stars
+        self.stars_se = Sprite(get_img_path("stars"))
+        self.stars_se.top = self.center_y
+        self.stars_se.left = self.center_x
+        self.stars.append(self.stars_se)
+
+        # Southwest stars
+        self.stars_sw = Sprite(get_img_path("stars"))
+        self.stars_sw.top = self.center_y
+        self.stars_sw.right = self.center_x
+        self.stars.append(self.stars_sw)
+
+        for s in self.stars:
+            s.width = self.width
+            s.height = self.height * 2
+            s.center_y = self.center_y
 
         self.look_at_center()
 
@@ -102,6 +137,7 @@ class App(Window):
 
     def on_draw(self):
         self.clear()
+        self.stars.draw()
         with self._camera_2.activate():
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
@@ -112,13 +148,24 @@ class App(Window):
 
         if self.horizontal:
             self._long = (self._long + (1 + self.horizontal * delta_time) * math.pi) % (2 * math.pi) - math.pi
+            percent = (self._long + math.pi) / math.tau
+            cent = percent * self.width
+            self.stars_ne.left = cent
+            self.stars_nw.right = cent
+            self.stars_se.left = cent
+            self.stars_sw.right = cent
 
         if self.forward:
             self._lat = clamp(-math.pi / 2.0, self._lat + self.forward * math.pi * delta_time, math.pi / 2.0)
+            percent = (self._lat + (math.pi / 2)) / math.pi
+            cent = percent * self.height
+            self.stars_ne.bottom = cent
+            self.stars_nw.bottom = cent
+            self.stars_se.top = cent
+            self.stars_sw.top = cent
 
         if self.forward or self.horizontal or self.vertical:
             self.look_at_center()
-
 
 
 def main():
