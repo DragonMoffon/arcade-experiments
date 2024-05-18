@@ -175,6 +175,7 @@ class App(Window):
             self._person.draw()
 
         with self._gui_cam.activate():
+            self.ctx.disable(self.ctx.DEPTH_TEST)
             self.text.draw()
 
     def on_update(self, delta_time: float):
