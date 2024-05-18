@@ -7,5 +7,5 @@ in vec2 vs_uv;
 out vec4 fs_colour;
 
 void main(){
-    fs_colour = vec4(2.5 * texture(texture0, vs_uv).r);
+    fs_colour = texture(texture0, vs_uv);
 }
