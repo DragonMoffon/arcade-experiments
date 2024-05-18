@@ -25,7 +25,11 @@ class PersonRenderer:
         y = math.sin(lat)
         z = math.sin(-long) * math.cos(lat)
 
-        self._rotation = Vec3(-math.sin(long), 0.0, math.cos(long))
+        angle = -math.acos(y)
+        vec = Vec3(1.0, 0.0, 0.0) if angle == 0 else Vec3(x, y, z).cross(Vec3(0.0, 1.0, 0.0)).normalize()
+
+        self._rotation = vec
+        self._angle = angle
         self._position = Vec3(x * R, y * R, z * R)
         self._dirty = True
 

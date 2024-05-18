@@ -35,7 +35,6 @@ class Renderer:
             fragment_shader=get_shader_string("sphere_circle_fs")
         )
         self._ring_program['line_width'] = radians(0.2)
-        # self._ring_program['error_transparency'] = 0.2
         self._ring_program['radius'] = 6500
         self._rings = ctx.buffer(
             data=array('f', (

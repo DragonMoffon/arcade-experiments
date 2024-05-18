@@ -15,11 +15,12 @@ class Renderer:
     def __init__(self):
         self._ctx = ctx = get_window().ctx
 
-        self._sphere = gl.geometry.sphere(6371, 1024, 1024)
+        self._sphere = gl.geometry.sphere(1.0, 1024, 1024)
         self._texture_program = ctx.program(
             vertex_shader=get_shader_string("sphere_texture_vs"),
             fragment_shader=get_shader_string("sphere_texture_fs")
         )
+        self._texture_program["radius"] = 6371
         self._texture_program["wrldText"] = 0
         self._texture_program["elevText"] = 1
         img = Image.open(get_img_path("world_blend_oct"))

@@ -20,7 +20,10 @@ class App(Window):
 
         self._renderer = Renderer()
         self._person = PersonRenderer()
-        self._camera_data = camera.CameraData(
+        self._camera_data_ortho = camera.CameraData(
+            position=(0.0, 0.0, 0.0)
+        )
+        self._camera_data_perp = camera.CameraData(
             position=(0.0, 0.0, 0.0)
         )
         self._projection_data = camera.PerspectiveProjectionData(
@@ -31,17 +34,15 @@ class App(Window):
             self.ctx.viewport
         )
         self._orthographic_data = camera.OrthographicProjectionData(
-            -7000 * self._projection_data.aspect, 7000 * self._projection_data.aspect,
-            -7000, 7000,
-            100.0,
+            -self.width / 2.0, self.width / 2.0,
+            -self.height / 2.0, self.height / 2.0,
+            0.01,
             20000.0,
             self.ctx.viewport
         )
 
-        self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
-        self._camera_2 = camera.OrthographicProjector(view=self._camera_data, projection=self._orthographic_data)
-        self._camera_2.projection.near = 0.01
-        self._camera_2.projection.far = 200000.0
+        self._camera = camera.PerspectiveProjector(view=self._camera_data_perp, projection=self._projection_data)
+        self._camera_2 = camera.OrthographicProjector(view=self._camera_data_ortho, projection=self._orthographic_data)
 
         self._gui_cam = camera.Camera2D()
 
@@ -72,13 +73,13 @@ class App(Window):
         forward = (-x, -y, -z)
         pos = (x * self._radius, y * self._radius, z * self._radius)
 
-        self._camera_data.position = pos
-        self._camera_data.forward = forward
+        self._camera_data_ortho.position = pos
+        self._camera_data_ortho.forward = forward
         fw = Vec3(forward[0], forward[1], forward[2])
         up = Vec3(0.0, 1.0, 0.0)
         ri = fw.cross(up)
         up = ri.cross(fw)
-        self._camera_data.up = up.x, up.y, up.z
+        self._camera_data_ortho.up = up.x, up.y, up.z
 
         self._person.set_world_coord(self._lat, self._long)
 
@@ -94,12 +95,12 @@ class App(Window):
             case key.GRAVE:
                 self._is_in_center_view_mode = not self._is_in_center_view_mode
                 if self._is_in_center_view_mode:
-                    self.look_at_center()
                     self.set_exclusive_mouse(False)
                 else:
                     self.set_exclusive_mouse(True)
-                    self.yaw = self._long + 180
-                    self.pitch = -self._lat
+                    self._camera_data_perp.position = self._camera_data_ortho.position
+                    self._camera_data_perp.forward = self._camera_data_ortho.forward
+                    camera.data_types.constrain_camera_data(self._camera_data_perp, forward_priority=True)
             case key.W:
                 self.forward += 1
             case key.S:
@@ -143,9 +144,9 @@ class App(Window):
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         if scroll_y > 0.0:
-            self._camera_data.zoom *= 1.1
+            self._camera_data_ortho.zoom *= 1.1
         elif scroll_y < 0.0:
-            self._camera_data.zoom /= 1.1
+            self._camera_data_ortho.zoom /= 1.1
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         if self._is_in_center_view_mode:
@@ -160,9 +161,16 @@ class App(Window):
             math.sin(p),
             math.sin(y) * math.cos(p)
         )
-        self._camera_data.forward = fw.normalize()
-        self._camera_data.up = (0.0, 1.0, 0.0)
-        camera.data_types.constrain_camera_data(self._camera_data, forward_priority=True)
+
+        up = Vec3(
+            math.sin(self._lat),
+            math.cos(-self._long) * math.cos(self._lat),
+            math.sin(-self._long) * math.cos(self._lat)
+        )
+
+        self._camera_data_perp.forward = fw.normalize()
+        self._camera_data_perp.up = up.normalize()
+        camera.data_types.constrain_camera_data(self._camera_data_perp, forward_priority=True)
 
     def on_draw(self):
         self.clear()
@@ -170,11 +178,12 @@ class App(Window):
         cam = self._camera_2 if self._is_in_center_view_mode else self._camera
 
         with cam.activate():
-            self._renderer._texture_program['light'] = self._camera_data.forward
+            self._renderer._texture_program['light'] = self._camera_data_ortho.forward
             self._renderer.draw()
             self._person.draw()
 
         with self._gui_cam.activate():
+            self.ctx.disable(self.ctx.DEPTH_TEST)
             self.text.draw()
 
     def on_update(self, delta_time: float):
@@ -192,15 +201,15 @@ class App(Window):
                 self.look_at_center()
         else:
             if self.forward:
-                old_pos = self._camera_data.position
-                fw = self._camera_data.forward
+                old_pos = self._camera_data_perp.position
+                fw = self._camera_data_perp.forward
                 vel = CAM_SPEED * delta_time * self.forward
 
-                self._camera_data.position = old_pos[0] + fw[0] * vel, old_pos[1] + fw[1] * vel, old_pos[2] + fw[2] * vel,
+                self._camera_data_perp.position = old_pos[0] + fw[0] * vel, old_pos[1] + fw[1] * vel, old_pos[2] + fw[2] * vel,
 
             if self.horizontal or self.vertical:
                 direction = Vec2(self.horizontal, self.vertical).normalize()
-                self._camera_data.position = camera.grips.strafe(self._camera_data, direction * CAM_SPEED * delta_time)
+                self._camera_data_perp.position = camera.grips.strafe(self._camera_data_perp, direction * CAM_SPEED * delta_time)
 
 
 def main():
