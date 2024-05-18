@@ -1,6 +1,7 @@
 import math
 
 from arcade import Window, camera, key
+from arcade.draw_commands import get_image
 from pyglet.math import Vec2
 
 from common.util import clamp
@@ -47,6 +48,12 @@ class App(Window):
 
         self.look_at_center()
 
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if scroll_y > 0.0:
+            self._camera_data.zoom *= 1.1
+        elif scroll_y < 0.0:
+            self._camera_data.zoom /= 1.1
+
     def look_at_center(self):
         y = math.sin(self._lat)
         x = math.cos(-self._long) * math.cos(self._lat)
@@ -62,7 +69,12 @@ class App(Window):
             case key.W:
                 self.forward += 1
             case key.S:
-                self.forward -= 1
+                if modifiers & key.MOD_CTRL:
+                    img = get_image()
+                    img.save("Screenshot.png")
+                    print("hmmmm")
+                else:
+                    self.forward -= 1
             case key.D:
                 self.horizontal += 1
             case key.A:
@@ -77,7 +89,8 @@ class App(Window):
             case key.W:
                 self.forward -= 1
             case key.S:
-                self.forward += 1
+                if not modifiers & key.MOD_CTRL:
+                    self.forward += 1
             case key.D:
                 self.horizontal -= 1
             case key.A:

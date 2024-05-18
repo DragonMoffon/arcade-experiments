@@ -14,8 +14,7 @@ out vec4 fs_colour;
 
 void main(){
     vec4 albedo = texture(wrldText, vs_uv);
-
-    float longitude = -PI + 2 * PI * vs_uv.x;
+    float longitude = PI * (2.0 * vs_uv.x - 1.0);
 
     vec3 forward = -vs_normal;
     vec3 right = vec3(-sin(longitude), 0.0, cos(longitude));

@@ -6,6 +6,7 @@ uniform WindowBlock {
 } window;
 
 uniform sampler2D elevText;
+uniform float radius;
 
 
 in vec3 in_position;
@@ -18,7 +19,7 @@ out vec2 vs_uv;
 void main(){
     mat4 mvp = window.projection * window.view;
 
-    vec3 height = texture(elevText, in_uv).a * 88.49 * in_normal;
+    vec3 height = (texture(elevText, in_uv).a * 88.49 + radius) * in_normal;
     gl_Position = mvp * vec4(in_position + height, 1.0);
     vs_normal = in_normal;
     vs_uv = in_uv;

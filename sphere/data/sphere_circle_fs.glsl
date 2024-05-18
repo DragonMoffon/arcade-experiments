@@ -31,25 +31,61 @@ float ring_error_sdf(vec4 ring, vec2 a){
 }
 
 
-float ring_sdf(vec4 ring, vec2 a){
-    return angular_distance(a, ring.xy);
+float ring_sdf(vec4 ring, vec2 a, float err){
+    return abs(angular_distance(a, ring.xy) - (1 + err) * ring.z);
+}
+
+float point_sdf(vec2 p, vec2 a){
+    return angular_distance(p, a);
 }
 
 
 void main(){
-    float longitude = -PI + 2.0 * PI * vs_uv.x;
-    float latitude = -PI / 2.0 + PI * vs_uv.y;
+    float longitude = PI * (2.0 * -vs_uv.x - 1.0);
+    float latitude = PI * (vs_uv.y - 0.5);
     vec2 coord = vec2(longitude, latitude);
 
-    float error = 0.0;
-    bool is_on_line = false;
+    int overlap_count = 0;
+    float closest_error = 100000000.0;
+    float closest_line = 100000000.0;
+    float closest_point = 10000000.0;
     for (int i = 0; i < rings.length(); i++){
         vec4 ring = rings[i];
+        closest_point = min(closest_point, point_sdf(ring.xy, coord));
         float e_d = ring_error_sdf(ring, coord);
-        if (e_d <= 0.0) error += error_transparency;
-        float m_d = ring_sdf(ring, coord);
-        if (m_d <= line_width) is_on_line = true;
+        if (e_d <= 0.0) overlap_count += 1;
+        closest_line = min(closest_line, ring_sdf(ring, coord, 0.0));
+        closest_error = min(min(ring_sdf(ring, coord, -ring.w), ring_sdf(ring, coord, ring.w)), closest_error);
     }
 
-    fs_colour = is_on_line ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(vs_uv, 0.5, error);
+    vec4 base_colour = vec4(0.0);
+    switch (overlap_count) {
+        case 0:
+            break;
+        case 1:
+            base_colour = vec4(1.0, 0.0, 0.0, 0.33);
+            break;
+        case 2:
+            base_colour = vec4(1.0, 0.0, 0.0, 0.67);
+            break;
+        case 3:
+            base_colour = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+
+
+    if (closest_error <= line_width){
+        float alpha = smoothstep(1.0, 0.0, closest_error / line_width);
+        base_colour = base_colour + vec4(1.0, 0.0, 0.0, alpha);
+    }
+    if (closest_point <= line_width * 10.0){
+        float alpha = smoothstep(1.0, 0.0, closest_point / (10.0 * line_width));
+        base_colour = base_colour + vec4(1.0, 1.0, 1.0, alpha);
+    }
+    if (closest_line <= line_width){
+        float t = closest_line / line_width;
+        float alpha = smoothstep(1.0, 0.0, t);
+        base_colour = vec4(0.0, 1.0, 0.0, alpha) * alpha + base_colour * (1.0 - alpha);
+    }
+
+    fs_colour = base_colour;
 }

@@ -17,11 +17,12 @@ class Renderer:
     def __init__(self):
         self._ctx = ctx = get_window().ctx
 
-        self._sphere = gl.geometry.sphere(6371, 1024, 1024)
+        self._sphere = gl.geometry.sphere(1.0, 1440, 720)
         self._texture_program = ctx.program(
             vertex_shader=get_shader_string("sphere_texture_vs"),
             fragment_shader=get_shader_string("sphere_texture_fs")
         )
+        self._texture_program["radius"] = 6371
         self._texture_program["wrldText"] = 0
         self._texture_program["elevText"] = 1
         img = Image.open(get_img_path("world_blend_oct"))
@@ -29,13 +30,13 @@ class Renderer:
         img = Image.open(get_img_path("world_bump"))
         self._elev_texture = ctx.texture(img.size, components=4, data=img.tobytes(), wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
 
-        self._ring_sphere = gl.geometry.sphere(6380, 1024, 1024)
         self._ring_program = ctx.program(
             vertex_shader=get_shader_string("blank_sphere_texture_vs"),
             fragment_shader=get_shader_string("sphere_circle_fs")
         )
-        self._ring_program['line_width'] = radians(2.0)
-        self._ring_program['error_transparency'] = 0.2
+        self._ring_program['line_width'] = radians(0.2)
+        # self._ring_program['error_transparency'] = 0.2
+        self._ring_program['radius'] = 6500
         self._rings = ctx.buffer(
             data=array('f', (
                 radians(174.704), radians(-41.309), radians(31.39), 0.05,  # First Ring (SNZO)
@@ -53,4 +54,4 @@ class Renderer:
         self._sphere.render(self._texture_program)
 
         self._rings.bind_to_storage_buffer()
-        self._ring_sphere.render(self._ring_program)
+        self._sphere.render(self._ring_program)
