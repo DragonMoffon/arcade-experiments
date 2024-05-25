@@ -4,7 +4,10 @@
 	"human": 180,
 	"house": 365.76,
 	"digi": 7.62,
-	"dragon": 490 ,
+	"dragon": 490,
 	"car": 141.4,
-	"coke": 20.3
+	"coke": 20.3,
+	"dust": 0.001,
+	"everest": 884886,
+	"skyscraper": 15000
 }
