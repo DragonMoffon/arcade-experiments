@@ -1,0 +1,118 @@
+import json
+import math
+import random
+
+import arcade
+
+from common.data_loading import make_package_file_opener, make_package_path_finder
+import heightviz2d.data as data
+
+open_json_file = make_package_file_opener(data, "json")
+get_png_path = make_package_path_finder(data, "png")
+
+
+class ZoomBucket:
+
+    def __init__(self, min_scale: int = -2, max_scale: int = 2):
+        self._min: int = min_scale
+        self._max: int = max_scale
+        self.zoom_levels: tuple[arcade.SpriteList, ...] = tuple(arcade.SpriteList() for _ in range(min_scale, max_scale+1))
+        self.current_focus_level: int = 0
+        self._sprites: tuple[arcade.Sprite, ...] = ()
+        self._item_map: dict[str, float] = {}
+
+    def load_items(self, scale_data: dict):
+        sprites = []
+
+        for name, scale in scale_data.items():
+            level = int(math.log10(scale / 10.0))
+            if not (self._min <= level <= self._max):
+                print(f"{name} is a level {level} object, but the range is {self._min}-{self._max}. Skipped")
+                continue
+
+            self._item_map[name] = scale
+            sprite = arcade.Sprite(
+                get_png_path(name),
+                center_x=(2.0 * (random.random() - 0.5) * 10**(level+1))
+            )
+            aspect = sprite.width / sprite.height
+
+            sprite.height = scale
+            sprite.depth = -scale
+            sprite.width = scale * aspect
+            sprite.center_y = sprite.height / 2.0
+
+            self.zoom_levels[level].append(sprite)
+            sprites.append(sprite)
+
+        self._sprites = tuple(sprites)
+
+    def draw(self):
+        for level in self.zoom_levels:
+            level.draw()
+
+    def incr(self):
+        self.current_focus_level += 1
+        for sprite in self._sprites:
+            sprite.width /= 100
+            sprite.height /= 100
+            sprite.center_x /= 100
+            sprite.center_y = sprite.height / 2.0
+
+    def decr(self):
+        self.current_focus_level -= 1
+        for sprite in self._sprites:
+            sprite.width *= 100
+            sprite.height *= 100
+            sprite.center_x *= 100
+            sprite.center_y = sprite.height / 2.0
+
+
+class HeightViz2DWindow(arcade.Window):
+
+    def __init__(self):
+        super().__init__()
+        self._zoom_factor = 0
+
+        self._cam = arcade.camera.Camera2D(position=(0.0, 0.0), far=2000)
+
+        self._zoom_buckets = ZoomBucket()
+        with open_json_file('scales') as file:
+            self._zoom_buckets.load_items(json.load(file))
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if scroll_y > 0:
+            self._cam.zoom *= 1.1
+            if self._cam.zoom >= 10.0:
+                print("sos")
+                self._cam.zoom = 0.1
+                self._zoom_factor -= 1
+                self._zoom_buckets.decr()
+
+                ox, oy = self._cam.position
+                self._cam.position = ox * 100, oy * 100
+        elif scroll_y < 0:
+            self._cam.zoom /= 1.1
+            if self._cam.zoom < 0.1:
+                print("sus")
+                self._cam.zoom = 10.0
+                self._zoom_factor += 1
+                self._zoom_buckets.incr()
+
+                ox, oy = self._cam.position
+                self._cam.position = ox / 100.0, oy / 100.0
+
+    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+        ox, oy = self._cam.position
+        self._cam.position = ox - dx / self._cam.zoom, oy - dy / self._cam.zoom
+
+    def on_draw(self):
+        self.ctx.enable(self.ctx.DEPTH_TEST)
+        self.clear(color=(155, 155, 155, 155))
+        self._cam.use()
+        self._zoom_buckets.draw()
+
+
+def main():
+    win = HeightViz2DWindow()
+    win.run()
