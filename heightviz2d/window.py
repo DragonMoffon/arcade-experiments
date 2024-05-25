@@ -99,6 +99,13 @@ class HeightViz2DWindow(arcade.Window):
 
         self.beep = load_shared_sound("blip_c")
 
+        self.one_hundred_px = self.one_hundred_px_calc()
+
+    def one_hundred_px_calc(self) -> float:
+        p1 = self._cam.unproject((0, 0))
+        p2 = self._cam.unproject((100, 0)) 
+        return (p2[0] - p1[0]) * (10 ** (self._zoom_buckets.current_focus_level * 2))
+
     def on_key_press(self, symbol: int, modifiers: int):
         pass
 
@@ -138,6 +145,8 @@ class HeightViz2DWindow(arcade.Window):
 
                 ox, oy = self._cam.position
                 self._cam.position = ox / 100.0, oy / 100.0
+        self.one_hundred_px = self.one_hundred_px_calc()
+        print(self.one_hundred_px)
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
         ox, oy = self._cam.position
@@ -156,9 +165,18 @@ class HeightViz2DWindow(arcade.Window):
                              arcade.color.WHITE_SMOKE,
                              anchor_x = "left", anchor_y = "top",
                              font_name="GohuFont 11 Nerd Font Mono",
-                             font_size = max(18 / (self._cam.zoom), 18),
+                             font_size = max(22 / (self._cam.zoom), 22),
                              multiline = True,
                              width = 1000)
+
+        self.default_camera.use()
+        self.ctx.disable(self.ctx.DEPTH_TEST)
+        arcade.draw_text(f"100px ~= {cm_to_str(self.one_hundred_px)}",
+                         5, self.height - 5,
+                         arcade.color.WHITE_SMOKE,
+                         anchor_x = "left", anchor_y = "top",
+                         font_name="GohuFont 11 Nerd Font Mono",
+                         font_size = 22)
 
 
 def main():
