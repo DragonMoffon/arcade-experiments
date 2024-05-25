@@ -3,8 +3,8 @@
 	"die": 1.4,
 	"human": 180,
 	"house": 365.76,
-	"digi": 7.62,
-	"dragon": 490,
+	"digi": 0.0762,
+	"dragon": 100000,
 	"car": 141.4,
 	"coke": 20.3
 }

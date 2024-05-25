@@ -13,7 +13,7 @@ get_png_path = make_package_path_finder(data, "png")
 
 class ZoomBucket:
 
-    def __init__(self, min_scale: int = -2, max_scale: int = 2):
+    def __init__(self, min_scale: int = -2, max_scale: int = 4):
         self._min: int = min_scale
         self._max: int = max_scale
         self.zoom_levels: tuple[arcade.SpriteList, ...] = tuple(arcade.SpriteList() for _ in range(min_scale, max_scale+1))
@@ -33,7 +33,7 @@ class ZoomBucket:
             self._item_map[name] = scale
             sprite = arcade.Sprite(
                 get_png_path(name),
-                center_x=(2.0 * (random.random() - 0.5) * 10**(level+1))
+                center_x=2.0 * (random.random() - 0.5) * 10**level
             )
             aspect = sprite.width / sprite.height
 
@@ -74,7 +74,7 @@ class HeightViz2DWindow(arcade.Window):
         super().__init__()
         self._zoom_factor = 0
 
-        self._cam = arcade.camera.Camera2D(position=(0.0, 0.0), far=2000)
+        self._cam = arcade.camera.Camera2D(position=(0.0, 0.0), far=100001)
 
         self._zoom_buckets = ZoomBucket()
         with open_json_file('scales') as file:
@@ -84,7 +84,6 @@ class HeightViz2DWindow(arcade.Window):
         if scroll_y > 0:
             self._cam.zoom *= 1.1
             if self._cam.zoom >= 10.0:
-                print("sos")
                 self._cam.zoom = 0.1
                 self._zoom_factor -= 1
                 self._zoom_buckets.decr()
@@ -94,7 +93,6 @@ class HeightViz2DWindow(arcade.Window):
         elif scroll_y < 0:
             self._cam.zoom /= 1.1
             if self._cam.zoom < 0.1:
-                print("sus")
                 self._cam.zoom = 10.0
                 self._zoom_factor += 1
                 self._zoom_buckets.incr()
