@@ -13,14 +13,18 @@ get_png_path = make_package_path_finder(data, "png")
 
 
 def cm_to_str(cm: float) -> str:
+    if cm < 0.1:
+        return f"{cm * 10:,.2f}mm"
     if cm < 1:
-        return f"{cm * 10:.1f}mm"
+        return f"{cm * 10:,.1f}mm"
     elif cm < 100:
-        return f"{cm:.1f}cm"
+        return f"{cm:,.1f}cm"
     elif cm < 100000:
-        return f"{cm / 100:.1f}m"
+        return f"{cm / 100:,.1f}m"
+    elif cm < 100000000:
+        return f"{cm / 100000:,.1f}km"
     else:
-        return f"{cm / 100000:.1f}km"
+        return f"{cm / 100000:,.0f}km"
 
 
 class ZoomBucket:
@@ -106,12 +110,21 @@ class HeightViz2DWindow(arcade.Window):
 
         self.beep = load_shared_sound("blip_c")
 
-        self.one_hundred_px = self.one_hundred_px_calc()
+        self.one_hundred_px: float = 0.0
+        self.closest_length_px_length: float = 0.0
+        self.closest_unit_measurement: float = 0.0
+        self.one_hundred_px_calc()
 
     def one_hundred_px_calc(self) -> float:
         p1 = self._cam.unproject((0, 0))
         p2 = self._cam.unproject((100, 0)) 
-        return (p2[0] - p1[0]) * (10 ** (self._zoom_buckets.current_focus_level * 2))
+        self.one_hundred_px = (p2[0] - p1[0]) * (10 ** (self._zoom_buckets.current_focus_level * 2))
+
+        # If 100px = self.one_hundred_px...
+        magnitude = math.floor(math.log10(self.one_hundred_px))
+        self.closest_unit_measurement = 10 ** magnitude
+        one_px = self.one_hundred_px / 100
+        self.closest_length_px_length = self.closest_unit_measurement / one_px
 
     def on_key_press(self, symbol: int, modifiers: int):
         pass
@@ -163,7 +176,7 @@ class HeightViz2DWindow(arcade.Window):
 
                 ox, oy = self._cam.position
                 self._cam.position = ox / 100.0, oy / 100.0
-        self.one_hundred_px = self.one_hundred_px_calc()
+        self.one_hundred_px_calc()
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
         if buttons & arcade.MOUSE_BUTTON_MIDDLE:
@@ -199,6 +212,7 @@ class HeightViz2DWindow(arcade.Window):
             _, s_y_b = self._cam.project((self.selected_sprite.right,  self.selected_sprite.bottom, 0.0))
             px_size = s_y - s_y_b
 
+            # Selected box text
             arcade.draw_text(self.selected_name.title() + "\n" + cm_to_str(self.selected_size),
                              s_x+4, s_y,
                              arcade.color.WHITE_SMOKE,
@@ -208,12 +222,26 @@ class HeightViz2DWindow(arcade.Window):
                              multiline=True,
                              width=1000)
 
+        # 100px equiv. text
         arcade.draw_text(f"100px ~= {cm_to_str(self.one_hundred_px)}",
                          5, self.height - 5,
                          arcade.color.WHITE_SMOKE,
                          anchor_x="left", anchor_y="top",
                          font_name="GohuFont 11 Nerd Font Mono",
                          font_size=22)
+
+        # Closest unit text
+        arcade.draw_text(f"{round(self.closest_length_px_length)}px ~= {cm_to_str(self.closest_unit_measurement)}",
+                         5, self.height - 30,
+                         arcade.color.WHITE_SMOKE,
+                         anchor_x="left", anchor_y="top",
+                         font_name="GohuFont 11 Nerd Font Mono",
+                         font_size=22)
+
+        # Draw measurement bar
+        arcade.draw_line(5, self.height - 65, 5 + self.closest_length_px_length, self.height - 65, arcade.color.WHITE_SMOKE, 3)
+        arcade.draw_line(5, self.height - 60, 5, self.height - 70, arcade.color.WHITE_SMOKE, 3)
+        arcade.draw_line(5 + self.closest_length_px_length, self.height - 60, 5 + self.closest_length_px_length, self.height - 70, arcade.color.WHITE_SMOKE, 3)
 
 
 def main():
