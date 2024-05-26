@@ -116,6 +116,7 @@ class HeightViz2DWindow(arcade.Window):
 
         bg_names = ["micro", "indoors", "outdoors", "space"]
         self.bgs = {k: arcade.Sprite(get_bg_path(k), 1, self.center_x, self.center_y) for k in bg_names}
+        self.show_bg = False
 
         self.local_time = 0.0
 
@@ -131,7 +132,8 @@ class HeightViz2DWindow(arcade.Window):
         self.closest_length_px_length = self.closest_unit_measurement / one_px
 
     def on_key_press(self, symbol: int, modifiers: int):
-        pass
+        if symbol == arcade.key.B:
+            self.show_bg = not self.show_bg
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if self.dragging and self.selected_sprite:
@@ -214,7 +216,8 @@ class HeightViz2DWindow(arcade.Window):
         self.ctx.disable(self.ctx.DEPTH_TEST)
         self.clear(color=(20, 20, 20))
 
-        self.draw_bg()
+        if self.show_bg:
+            self.draw_bg()
 
         self._cam.use()
         self._zoom_buckets.draw()
