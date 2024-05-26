@@ -28,13 +28,13 @@ class ZoomBucket:
     def __init__(self, min_scale: int = -2, max_scale: int = 4):
         self._min: int = min_scale
         self._max: int = max_scale
-        self.zoom_levels: tuple[arcade.SpriteList, ...] = tuple(arcade.SpriteList() for _ in range(min_scale, max_scale+1))
+        self.zoom_levels: tuple[list[arcade.Sprite], ...] = tuple(list() for _ in range(min_scale, max_scale+1))
+        self._active_sprites = ()
+        self._sprites: arcade.SpriteList = arcade.SpriteList()
         self.current_focus_level: int = 0
-        self._sprites: tuple[arcade.Sprite, ...] = ()
         self._item_map: dict[str, float] = {}
 
     def load_items(self, scale_data: dict):
-        sprites = []
 
         for name, scale in scale_data.items():
             level = int(math.log10(scale / 10.0))
@@ -54,15 +54,15 @@ class ZoomBucket:
             sprite.width = scale * aspect
             sprite.center_y = sprite.height / 2.0
             sprite.properties["name"] = name
+            sprite.properties['level'] = level
 
             self.zoom_levels[level].append(sprite)
-            sprites.append(sprite)
+            self._sprites.append(sprite)
 
-        self._sprites = tuple(sprites)
+        self._sprites.sort(key=lambda s: s.depth)
 
     def draw(self):
-        for level in self.zoom_levels:
-            level.draw()
+        self._sprites.draw()
 
     def incr(self):
         self.current_focus_level += 1
@@ -80,6 +80,10 @@ class ZoomBucket:
             sprite.center_x *= 100
             sprite.center_y = sprite.height / 2.0
 
+    def bring_to_front(self, sprite):
+        self._sprites.remove(sprite)
+        self._sprites.append(sprite)
+
 
 class HeightViz2DWindow(arcade.Window):
 
@@ -94,8 +98,11 @@ class HeightViz2DWindow(arcade.Window):
             self._zoom_buckets.load_items(json.load(file))
 
         self.selected_box: tuple[float, float, float, float] | None = None
+        self.selected_sprite: arcade.Sprite = None
         self.selected_name: str = ""
         self.selected_size: float = 0
+
+        self.dragging: bool = False
 
         self.beep = load_shared_sound("blip_c")
 
@@ -109,20 +116,31 @@ class HeightViz2DWindow(arcade.Window):
     def on_key_press(self, symbol: int, modifiers: int):
         pass
 
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+        if self.dragging and self.selected_sprite:
+            self.selected_sprite.center_y = self.selected_sprite.height / 2.0
+        self.dragging = False
+
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         old_selected_name = self.selected_name
         x, y, _ = self._cam.unproject((x, y))
-        for sprite in sorted(self._zoom_buckets._sprites, key = lambda s: s.height):
+        for sprite in self._zoom_buckets._sprites[::-1]:
+            if abs(sprite.properties.get('level', 1000000) - self._zoom_buckets.current_focus_level) > 2:
+                print(sprite.properties.get('name', ''))
+                continue
+
             if (sprite.left <= x <= sprite.right) and (sprite.bottom <= y <= sprite.top):
                 self.selected_box = (sprite.left, sprite.right, sprite.bottom, sprite.top)
                 self.selected_name = sprite.properties["name"]
                 self.selected_size = sprite.height * (10 ** (self._zoom_buckets.current_focus_level * 2))
+                self.selected_sprite = sprite
 
                 if self.selected_name != old_selected_name:
                     self.beep.play()
                 break
         else:
             self.selected_box = None
+            self.selected_sprite = None
             self.selected_name = ""
             self.selected_size = 0
 
@@ -146,37 +164,56 @@ class HeightViz2DWindow(arcade.Window):
                 ox, oy = self._cam.position
                 self._cam.position = ox / 100.0, oy / 100.0
         self.one_hundred_px = self.one_hundred_px_calc()
-        print(self.one_hundred_px)
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
-        ox, oy = self._cam.position
-        self._cam.position = ox - dx / self._cam.zoom, oy - dy / self._cam.zoom
+        if buttons & arcade.MOUSE_BUTTON_MIDDLE:
+            ox, oy = self._cam.position
+            self._cam.position = ox - dx / self._cam.zoom, oy - dy / self._cam.zoom
+        elif buttons & arcade.MOUSE_BUTTON_LEFT and self.selected_sprite:
+            if not self.dragging:
+                self._zoom_buckets.bring_to_front(self.selected_sprite)
+
+            n_dx, n_dy, _ = self._cam.unproject((dx, dy))
+            n_ox, n_oy, _ = self._cam.unproject((0.0, 0.0))
+
+            p = self.selected_sprite.position
+            self.selected_sprite.position = p[0] + (n_dx - self._cam.left), p[1] + (n_dy - self._cam.bottom)
+            self.dragging = True
+        else:
+            self.on_mouse_motion(x, y, dx, dy)
 
     def on_draw(self):
-        self.ctx.enable(self.ctx.DEPTH_TEST)
+        self.ctx.disable(self.ctx.DEPTH_TEST)
         self.clear(color=(20, 20, 20))
         self._cam.use()
         self._zoom_buckets.draw()
 
-        if self.selected_box:
-            arcade.draw_lrbt_rectangle_outline(*self.selected_box, arcade.color.WHITE_SMOKE, 3 / self._cam.zoom)
-            arcade.draw_text(self.selected_name.title() + "\n" + cm_to_str(self.selected_size),
-                             self.selected_box[1], self.selected_box[3],
-                             arcade.color.WHITE_SMOKE,
-                             anchor_x = "left", anchor_y = "top",
-                             font_name="GohuFont 11 Nerd Font Mono",
-                             font_size = max(22 / (self._cam.zoom), 22),
-                             multiline = True,
-                             width = 1000)
+        if self.selected_sprite:
+            l, r, b, t = self.selected_sprite.left, self.selected_sprite.right, self.selected_sprite.bottom, self.selected_sprite.top
+            arcade.draw_lrbt_rectangle_outline(l, r, b, t, arcade.color.WHITE_SMOKE, 3 / self._cam.zoom)
 
         self.default_camera.use()
-        self.ctx.disable(self.ctx.DEPTH_TEST)
+
+        if self.selected_box:
+            s_x, s_y = self._cam.project((self.selected_sprite.right, self.selected_sprite.top, 0.0))
+            _, s_y_b = self._cam.project((self.selected_sprite.right,  self.selected_sprite.bottom, 0.0))
+            px_size = s_y - s_y_b
+
+            arcade.draw_text(self.selected_name.title() + "\n" + cm_to_str(self.selected_size),
+                             s_x+4, s_y,
+                             arcade.color.WHITE_SMOKE,
+                             anchor_x="left", anchor_y="top",
+                             font_name="GohuFont 11 Nerd Font Mono",
+                             font_size=max(min(22.0, px_size*0.25), 1.0),
+                             multiline=True,
+                             width=1000)
+
         arcade.draw_text(f"100px ~= {cm_to_str(self.one_hundred_px)}",
                          5, self.height - 5,
                          arcade.color.WHITE_SMOKE,
-                         anchor_x = "left", anchor_y = "top",
+                         anchor_x="left", anchor_y="top",
                          font_name="GohuFont 11 Nerd Font Mono",
-                         font_size = 22)
+                         font_size=22)
 
 
 def main():
