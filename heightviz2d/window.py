@@ -15,9 +15,11 @@ get_bg_path = make_package_path_finder(bg, "png")
 
 
 def cm_to_str(cm: float) -> str:
-    if cm < 0.1:
+    if cm < 0.01:
+        return f"{cm * 10}mm"
+    elif cm < 0.1:
         return f"{cm * 10:,.2f}mm"
-    if cm < 1:
+    elif cm < 1:
         return f"{cm * 10:,.1f}mm"
     elif cm < 100:
         return f"{cm:,.1f}cm"
@@ -122,7 +124,7 @@ class HeightViz2DWindow(arcade.Window):
 
     def one_hundred_px_calc(self) -> float:
         p1 = self._cam.unproject((0, 0))
-        p2 = self._cam.unproject((100, 0)) 
+        p2 = self._cam.unproject((100, 0))
         self.one_hundred_px = (p2[0] - p1[0]) * (10 ** (self._zoom_buckets.current_focus_level * 2))
 
         # If 100px = self.one_hundred_px...
