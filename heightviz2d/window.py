@@ -16,7 +16,7 @@ get_bg_path = make_package_path_finder(bg, "png")
 
 def cm_to_str(cm: float) -> str:
     if cm < 0.01:
-        return f"{cm * 10}mm"
+        return f"{cm * 10000:,.2f}µm"
     elif cm < 0.1:
         return f"{cm * 10:,.2f}mm"
     elif cm < 1:
