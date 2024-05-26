@@ -118,9 +118,18 @@ class HeightViz2DWindow(arcade.Window):
 
         bg_names = ["micro", "indoors", "outdoors", "space"]
         self.bgs = {k: arcade.Sprite(get_bg_path(k), 1, self.center_x, self.center_y) for k in bg_names}
+        self.floors = {}
+        for bg in bg_names:
+            try:
+                s = arcade.Sprite(get_bg_path(f"{bg}-floor"), 1.0, self.center_x, 0.0)
+                self.floors[bg] = s
+            except FileNotFoundError:
+                pass
         self.show_bg = False
 
         self.local_time = 0.0
+
+        self.modifiers = 0
 
     def one_hundred_px_calc(self) -> float:
         p1 = self._cam.unproject((0, 0))
@@ -134,10 +143,15 @@ class HeightViz2DWindow(arcade.Window):
         self.closest_length_px_length = self.closest_unit_measurement / one_px
 
     def on_key_press(self, symbol: int, modifiers: int):
+        self.modifiers = modifiers
         if symbol == arcade.key.B:
             self.show_bg = not self.show_bg
 
+    def on_key_release(self, symbol: int, modifiers: int):
+        self.modifiers = modifiers
+
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+        self.modifiers = modifiers
         if self.dragging and self.selected_sprite:
             self.selected_sprite.center_y = self.selected_sprite.height / 2.0
         self.dragging = False
@@ -165,6 +179,15 @@ class HeightViz2DWindow(arcade.Window):
             self.selected_size = 0
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if self.modifiers & arcade.key.MOD_CTRL and self.selected_sprite and self.selected_sprite.properties['name'] in {'digi', 'dragon'}:
+            if scroll_y > 0.0:
+                self.selected_sprite.height *= 1.1
+                self.selected_sprite.width *= 1.1
+            elif scroll_y < 0.0:
+                self.selected_sprite.height /= 1.1
+                self.selected_sprite.width /= 1.1
+            return
+
         if scroll_y > 0:
             self._cam.zoom *= 1.1
             if self._cam.zoom >= 10.0:
@@ -186,6 +209,7 @@ class HeightViz2DWindow(arcade.Window):
         self.one_hundred_px_calc()
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+        self.modifiers = modifiers
         if buttons & arcade.MOUSE_BUTTON_MIDDLE:
             ox, oy = self._cam.position
             self._cam.position = ox - dx / self._cam.zoom, oy - dy / self._cam.zoom
@@ -214,6 +238,32 @@ class HeightViz2DWindow(arcade.Window):
         else:
             self.bgs["space"].draw()
 
+    def draw_floor(self):
+        if self.one_hundred_px < 0.1:
+            if 'micro' in self.floors:
+                s = self.floors['micro']
+                s.scale = 1/self._cam.zoom
+                s.center_x = self._cam.position[0]
+                s.draw()
+        elif self.one_hundred_px < 50:
+            if 'indoors' in self.floors:
+                s = self.floors['indoors']
+                s.scale = 1 / self._cam.zoom
+                s.center_x = self._cam.position[0]
+                s.draw()
+        elif self.one_hundred_px < 2500000:
+            if 'outdoors' in self.floors:
+                s = self.floors['outdoors']
+                s.scale = 1 / self._cam.zoom
+                s.center_x = self._cam.position[0]
+                s.draw()
+        else:
+            if 'space' in self.floors:
+                s = self.floors['space']
+                s.scale = 1 / self._cam.zoom
+                s.center_x = self._cam.position[0]
+                s.draw()
+
     def on_draw(self):
         self.ctx.disable(self.ctx.DEPTH_TEST)
         self.clear(color=(20, 20, 20))
@@ -222,6 +272,9 @@ class HeightViz2DWindow(arcade.Window):
             self.draw_bg()
 
         self._cam.use()
+        if self.show_bg:
+            self.draw_floor()
+
         self._zoom_buckets.draw()
 
         if self.selected_sprite:
