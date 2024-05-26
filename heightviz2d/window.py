@@ -7,9 +7,11 @@ import arcade
 from common.data_loading import make_package_file_opener, make_package_path_finder
 from common.util import load_shared_sound
 import heightviz2d.data as data
+import heightviz2d.bg as bg
 
 open_json_file = make_package_file_opener(data, "json")
 get_png_path = make_package_path_finder(data, "png")
+get_bg_path = make_package_path_finder(bg, "png")
 
 
 def cm_to_str(cm: float) -> str:
@@ -28,8 +30,7 @@ def cm_to_str(cm: float) -> str:
 
 
 class ZoomBucket:
-
-    def __init__(self, min_scale: int = -2, max_scale: int = 4):
+    def __init__(self, min_scale: int = -4, max_scale: int = 4):
         self._min: int = min_scale
         self._max: int = max_scale
         self.zoom_levels: tuple[list[arcade.Sprite], ...] = tuple(list() for _ in range(min_scale, max_scale+1))
@@ -39,7 +40,6 @@ class ZoomBucket:
         self._item_map: dict[str, float] = {}
 
     def load_items(self, scale_data: dict):
-
         for name, scale in scale_data.items():
             level = int(math.log10(scale / 10.0))
             if not (self._min <= level <= self._max):
@@ -90,7 +90,6 @@ class ZoomBucket:
 
 
 class HeightViz2DWindow(arcade.Window):
-
     def __init__(self):
         super().__init__()
         self._zoom_factor = 0
@@ -114,6 +113,11 @@ class HeightViz2DWindow(arcade.Window):
         self.closest_length_px_length: float = 0.0
         self.closest_unit_measurement: float = 0.0
         self.one_hundred_px_calc()
+
+        bg_names = ["micro", "indoors", "outdoors", "space"]
+        self.bgs = {k: arcade.Sprite(get_bg_path(k), 1, self.center_x, self.center_y) for k in bg_names}
+
+        self.local_time = 0.0
 
     def one_hundred_px_calc(self) -> float:
         p1 = self._cam.unproject((0, 0))
@@ -139,7 +143,6 @@ class HeightViz2DWindow(arcade.Window):
         x, y, _ = self._cam.unproject((x, y))
         for sprite in self._zoom_buckets._sprites[::-1]:
             if abs(sprite.properties.get('level', 1000000) - self._zoom_buckets.current_focus_level) > 2:
-                print(sprite.properties.get('name', ''))
                 continue
 
             if (sprite.left <= x <= sprite.right) and (sprite.bottom <= y <= sprite.top):
@@ -187,7 +190,6 @@ class HeightViz2DWindow(arcade.Window):
                 self._zoom_buckets.bring_to_front(self.selected_sprite)
 
             n_dx, n_dy, _ = self._cam.unproject((dx, dy))
-            n_ox, n_oy, _ = self._cam.unproject((0.0, 0.0))
 
             p = self.selected_sprite.position
             self.selected_sprite.position = p[0] + (n_dx - self._cam.left), p[1] + (n_dy - self._cam.bottom)
@@ -195,15 +197,32 @@ class HeightViz2DWindow(arcade.Window):
         else:
             self.on_mouse_motion(x, y, dx, dy)
 
+    def on_update(self, delta_time: float):
+        self.local_time += delta_time
+
+    def draw_bg(self):
+        if self.one_hundred_px < 0.1:
+            self.bgs["micro"].draw()
+        elif self.one_hundred_px < 50:
+            self.bgs["indoors"].draw()
+        elif self.one_hundred_px < 2500000:
+            self.bgs["outdoors"].draw()
+        else:
+            self.bgs["space"].draw()
+
     def on_draw(self):
         self.ctx.disable(self.ctx.DEPTH_TEST)
         self.clear(color=(20, 20, 20))
+
+        self.draw_bg()
+
         self._cam.use()
         self._zoom_buckets.draw()
 
         if self.selected_sprite:
+            alpha = abs(int(math.sin(self.local_time) * 255))
             l, r, b, t = self.selected_sprite.left, self.selected_sprite.right, self.selected_sprite.bottom, self.selected_sprite.top
-            arcade.draw_lrbt_rectangle_outline(l, r, b, t, arcade.color.WHITE_SMOKE, 3 / self._cam.zoom)
+            arcade.draw_lrbt_rectangle_outline(l, r, b, t, arcade.color.WHITE_SMOKE[:3] + (alpha, ), 3 / self._cam.zoom)
 
         self.default_camera.use()
 
