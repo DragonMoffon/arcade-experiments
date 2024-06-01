@@ -3,6 +3,8 @@
 import arcade
 import pyglet
 
+from arcade.types import Point2, Color
+
 from common.data_loading import make_package_path_finder
 import common.data.fonts as fonts
 import common.data.models as models
@@ -32,3 +34,18 @@ def load_shared_model(name: str) -> pyglet.model.Model: return pyglet.model.load
 def clamp(minVal, val, maxVal):
     """Clamp a `val` to be no lower than `minVal`, and no higher than `maxVal`."""
     return max(minVal, min(maxVal, val))
+
+def draw_cross(origin: Point2, size: float, color: Color = arcade.color.WHITE, thickness = 1.0):
+    x, y = origin
+    arcade.draw_line(
+        x - size, y - size,
+        x + size, y + size,
+        color,
+        thickness
+        )
+    arcade.draw_line(
+        x + size, y - size,
+        x - size, y + size,
+        color,
+        thickness
+    )
