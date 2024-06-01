@@ -17,7 +17,7 @@ class ExperimentPickerWindow(arcade.Window):
         self._blip_sound: arcade.Sound = load_shared_sound("blip_c")
         self._select_sound: arcade.Sound = load_shared_sound("blip_a")
         self._scroll_animator: SecondOrderAnimatorBase = ProceduralAnimator(1.0, 0.75, 1.0, 0.0, 0.0, 0.0)
-        self._text_cam: arcade.camera.Camera2D = arcade.camera.Camera2D(position=(0.0, 0.0), viewport=(10, 10, self.width-20, self.height-100))
+        self._text_cam: arcade.camera.Camera2D = arcade.camera.Camera2D(position=(0.0, 0.0), viewport=arcade.LRBT(10, self.width-20, 10, self.height-100))
         self._text_cam.equalise()
 
         self._text_batch = pyglet.shapes.Batch()
