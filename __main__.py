@@ -9,6 +9,7 @@ from animator.main import main as animator_main
 from sphere.window import main as sphere_main
 from heightviz.window import main as height_main
 from heightviz2d.window import main as height2d_main
+from rectdemo.window import main as rect_main
 
 if __name__ == '__main__':
     load_shared_font("gohu")
@@ -21,6 +22,7 @@ if __name__ == '__main__':
             "Automatic Animator": (animator_main, (), {}),
             "Sphere 3D": (sphere_main, (), {}),
             "Scale Visualizer 2D": (height2d_main, (), {}),
-            "Scale Visualizer 3D": (height_main, (), {})
+            "Scale Visualizer 3D": (height_main, (), {}),
+            "Rect Demo": (rect_main, (), {})
         }
     )
