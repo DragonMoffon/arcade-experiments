@@ -1,4 +1,4 @@
-from arcade import Text, Window, Rect, draw_line, draw_text
+from arcade import Text, Window, Rect, draw_line
 from arcade.draw_commands import draw_rect_outline, draw_point
 from arcade.types import Point2
 import arcade.color
@@ -75,13 +75,21 @@ class RectWindow(Window):
 
     def update_text(self):
         self.width_text.text = f"← {self.rectangle.width:.0f} →"
+        self.width_text.position = (self.rectangle.center_x, self.rectangle.top - 5)
         self.height_text.text = f"↑\n{self.rectangle.height:.0f}\n↓"
+        self.height_text.position = (self.rectangle.right - 5, self.rectangle.center_y)
         self.top_text.text = f"{self.rectangle.top:.0f}"
+        self.top_text.position = (self.rectangle.center_x, self.rectangle.top + 5)
         self.bottom_text.text = f"{self.rectangle.bottom:.0f}"
+        self.bottom_text.position = (self.rectangle.center_x, self.rectangle.bottom - 5)
         self.left_text.text = f"{self.rectangle.left:.0f}"
+        self.left_text.position = (self.rectangle.left - 5, self.rectangle.center_y)
         self.right_text.text = f"{self.rectangle.right:.0f}"
+        self.right_text.position = (self.rectangle.right + 5, self.rectangle.center_y)
         self.center_text.text = f"({self.rectangle.center_x:.0f}, {self.rectangle.center_y:.0f})"
+        self.center_text.position = (self.rectangle.center_x, self.rectangle.center_y - 5)
         self.area_text.text = f"{self.rectangle.area:.0f}px²"
+        self.area_text.position = (self.rectangle.right - 3, self.rectangle.bottom + 3)
 
     def on_draw(self):
         self.clear()
