@@ -1,4 +1,4 @@
-from arcade import Text, Window, Rect, draw_line, draw_text
+from arcade import Text, Window, Rect, draw_line
 from arcade.draw_commands import draw_rect_outline, draw_point
 from arcade.types import Point2
 import arcade.color
@@ -8,11 +8,25 @@ from pyglet.math import Vec2
 
 
 def closest_point_on_bounds(rect: Rect, point: Point2) -> Vec2:
+    d = rect.distance_from_bounds(point)
+
+    if d > 0:
+        return point
+
     px, py = point
-    diff = Vec2(px - rect.x, py - rect.y)
-    dx = abs(diff.x) - rect.width / 2.0
-    dy = abs(diff.y) - rect.height / 2.0
-    return Vec2(px + dx, py + dy)
+
+    d_bottom = rect.bottom - py
+    d_top = rect.top - py
+
+    d_left = rect.left - px
+    d_right = rect.right - px
+
+    dx = d_left if abs(d_left) < abs(d_right) else d_right
+    dy = d_bottom if abs(d_bottom) < abs(d_top) else d_top
+
+    if abs(dx) < abs(dy):
+        return Vec2(px + dx, py)
+    return Vec2(px, py + dy)
 
 
 class RectWindow(Window):
@@ -72,6 +86,17 @@ class RectWindow(Window):
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         self.mouse_pos = Vec2(x, y)
+
+    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+        self.on_mouse_motion(x, y, dx, dy)
+        if buttons == arcade.MOUSE_BUTTON_LEFT:
+            d_x, d_y = self.rectangle.x - x, self.rectangle.y - y
+            s_x, s_y = d_x / abs(d_x), d_y / abs(d_y)
+
+            anchor = Vec2(s_x * 0.5 + 0.5, s_y * 0.5 + 0.5)
+            n_width = self.rectangle.width + dx * -s_x
+            n_height = self.rectangle.height + dy * -s_y
+            self.rectangle = self.rectangle.resize(n_width, n_height, anchor)
 
     def update_text(self):
         self.width_text.text = f"← {self.rectangle.width:.0f} →"
