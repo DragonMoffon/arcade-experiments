@@ -23,7 +23,7 @@ PANEL_START = 0.667
 PANEL_CENTER = (1 - PANEL_START) / 2 + PANEL_START
 FONT_NAME = "GohuFont 11 Nerd Font Mono"
 
-letters = "abcdefghijklmnopqrstuvwxyz 12345678901234567890"
+letters = "abcdefghijklmnopqrstuvwxyz 01234567890123456789"
 letter_keys = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE,
                KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
                NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9]
