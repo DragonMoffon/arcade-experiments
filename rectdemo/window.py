@@ -93,7 +93,7 @@ class RectWindow(Window):
             d_x, d_y = self.rectangle.x - x, self.rectangle.y - y
             s_x, s_y = d_x / abs(d_x), d_y / abs(d_y)
 
-            anchor = Vec2(s_x * 0.5 + 0.5, s_y * 0.5 + 0.5)
+            anchor = self.rectangle.position_to_uv((x, y))
             n_width = self.rectangle.width + dx * -s_x
             n_height = self.rectangle.height + dy * -s_y
             self.rectangle = self.rectangle.resize(n_width, n_height, anchor)

@@ -11,6 +11,7 @@ from heightviz.window import main as height_main
 from heightviz2d.window import main as height2d_main
 from rectdemo.window import main as rect_main
 from rigidbody.window import main as rigid_main
+from wavrider.window import main as wavmain
 
 if __name__ == '__main__':
     load_shared_font("gohu")
@@ -25,6 +26,7 @@ if __name__ == '__main__':
             "Scale Visualizer 2D": (height2d_main, (), {}),
             "Scale Visualizer 3D": (height_main, (), {}),
             "Rect Demo": (rect_main, (), {}),
-            "Rigid Body Sim 2D": (rigid_main, (), {})
+            "Rigid Body Sim 2D": (rigid_main, (), {}),
+            "WavRider": (wavmain, (), {})
         }
     )
