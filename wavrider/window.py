@@ -36,7 +36,6 @@ def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100
         signal_wave = wav.readframes(sample_count)
     step = int(sample_count / width)
     samples = np.frombuffer(signal_wave, dtype=np.int16)[::step]
-    print(max(samples))
     multiplier = max(samples) / max_height
     return [(n + x, float(s) / multiplier + y) for n, s in enumerate(samples)]
 
@@ -132,6 +131,9 @@ class RiderWindow(Window):
         arcade.draw_line_strip(self.waveform, arcade.color.WHITE, 5)
 
     def setup_selected_wav(self):
+        if self.player:
+            self.player.delete()
+
         path = self.directory + "/" + self.selected_wav
         self.show_sound = True
         self.sound = Sound(path)
@@ -234,6 +236,11 @@ class RiderWindow(Window):
 
     def on_draw(self):
         self.clear(IRIS_HAIR)
+
+        if not self.asked_folder:
+            self.render_prompt()
+            return
+
         self.directory_text.draw()
         self.wavs_before_text.draw()
         self.wav_selected_text.draw()
