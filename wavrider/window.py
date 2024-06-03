@@ -3,6 +3,7 @@ from tkinter.filedialog import askdirectory
 import wave
 
 import numpy as np
+import pyglet.gui
 
 from arcade import LRBT, Sound, Window, Text
 from arcade.key import A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE, \
@@ -27,17 +28,21 @@ letters = "abcdefghijklmnopqrstuvwxyz 01234567890123456789"
 letter_keys = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE,
                KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
                NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9]
+letter_map = {
+    letters[idx]: letter_keys[idx] for idx in range(len(letters))
+}
 
 
-def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100) -> list[tuple[int, int]]:
+def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100) -> list[tuple[float, float]]:
     with open(path, "rb") as f:
         wav = wave.open(f, "rb")
         sample_count = wav.getnframes()
         signal_wave = wav.readframes(sample_count)
     step = int(sample_count / width)
     samples = np.frombuffer(signal_wave, dtype=np.int16)[::step]
-    multiplier = max(samples) / max_height
-    return [(n + x, float(s) / multiplier + y) for n, s in enumerate(samples)]
+    frac = width / len(samples)
+    multiplier = np.max(samples) / max_height
+    return [(n * frac + x, float(s) / multiplier + y) for n, s in enumerate(samples)]
 
 
 def get_panel_font_size(window: Window, s: str, max_size = 28) -> int:
@@ -112,7 +117,12 @@ class RiderWindow(Window):
         self.player = None
         self.waveform = []
 
-        self.sfx: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ["blip_a", "blip_c", "blip_e"]}
+        self.sfx: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ("blip_a", "blip_c", "blip_e")}
+
+        self.gui: pyglet.shapes.Batch = pyglet.shapes.Batch()
+        self.text_input = pyglet.gui.TextEntry("", x=self.width-30.0, y=self.height-15.0, width=100.0, batch=self.gui)
+        self.push_handlers(self.text_input)
+        self._last_text = ""
 
     @property
     def selected_wav(self) -> str:
@@ -128,7 +138,8 @@ class RiderWindow(Window):
     def render_selected_wav(self):
         arcade.draw_rect_filled(LRBT(self.width * PANEL_START, self.width, 0, self.search_box.bottom - TEXT_OFFSET), IRIS_DARK)
         self.panel_text.draw()
-        arcade.draw_line_strip(self.waveform, arcade.color.WHITE, 5)
+        arcade.draw_line_strip(self.waveform[:11], arcade.color.YELLOW, 5)
+        arcade.draw_line_strip(self.waveform[10:], arcade.color.WHITE, 5)
 
     def setup_selected_wav(self):
         if self.player:
@@ -158,8 +169,8 @@ class RiderWindow(Window):
 
     def update_search(self):
         self.selected_index = 0
-        self.wavs = self.get_searched_wavs(self.search_term)
-        self.search_box.text = self.search_term if self.search_term else "[type to search]"
+        self.wavs = self.get_searched_wavs(self.text_input.value)
+        self.search_box.text = self.text_input.value if self.text_input.value else "[type to search]"
         self.update_wav_text()
 
     def ask_folder(self):
@@ -212,23 +223,21 @@ class RiderWindow(Window):
                 self.selected_index -= 1
                 self.update_wav_text()
                 self.play_sound("blip_a")
-        elif symbol in letter_keys:
-            self.search_term += letters[letter_keys.index(symbol)]
-            self.update_search()
-            self.play_sound("blip_e")
-        elif symbol == BACKSPACE:
-            if self.search_term:
-                self.search_term = self.search_term[:-1]
-                self.update_search()
-                self.play_sound("blip_c")
         elif symbol == DELETE:
-            self.search_term = ""
-            self.update_search()
-            self.play_sound("blip_c")
+            self.text_input.value = ""
         elif symbol == ENTER:
             self.setup_selected_wav()
 
     def on_update(self, delta_time: float):
+        self.text_input.focus = True
+        if self._last_text != self.text_input.value:
+            self.update_search()
+            if len(self._last_text) < len(self.text_input.value):
+                self.play_sound("blip_c")
+            else:
+                self.play_sound("blip_e")
+            self._last_text = self.text_input.value
+        
         self.local_time += delta_time
         if not self.asked_folder and self.local_time > 1:
             self.ask_folder()
