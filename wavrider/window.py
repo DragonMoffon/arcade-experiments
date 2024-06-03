@@ -14,6 +14,7 @@ from arcade.types import Color
 import arcade.color
 
 from common.util import load_shared_sound
+from common.experimentwindow import ExpWin
 
 IRIS_PURPLE = Color.from_hex_string("9900B2")
 IRIS_DARK = Color.from_hex_string("5D007E")
@@ -58,7 +59,7 @@ def get_panel_font_size(window: Window, s: str, max_size = 28) -> int:
     return font_size
 
 
-class RiderWindow(Window):
+class RiderWindow(ExpWin):
     def __init__(self):
         super().__init__(1280, 720, "WavRider")
         self.local_time = 0.0
@@ -249,7 +250,7 @@ class RiderWindow(Window):
 
         if self.player is None:
             return
-        
+
         if self.player.source is None:
             self._fraction = 1.0
         else:
@@ -272,8 +273,9 @@ class RiderWindow(Window):
             self.render_selected_wav()
 
 
-def main():
+def main(show_fps: bool = False):
     win = RiderWindow()
+    win.show_fps(show_fps)
     win.run()
 
 

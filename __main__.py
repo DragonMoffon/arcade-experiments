@@ -27,6 +27,6 @@ if __name__ == '__main__':
             "Scale Visualizer 3D": (height_main, (), {}),
             "Rect Demo": (rect_main, (), {}),
             "Rigid Body Sim 2D": (rigid_main, (), {}),
-            "WavRider": (wavmain, (), {})
+            "WavRider": (wavmain, (), {"show_fps": True})
         }
     )
