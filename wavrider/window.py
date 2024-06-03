@@ -114,7 +114,7 @@ class RiderWindow(Window):
         self.search_term = ""
 
         self.sound = None
-        self.player = None
+        self.player: pyglet.media.Player = None
         self.waveform = []
 
         self.sfx: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ("blip_a", "blip_c", "blip_e")}
@@ -123,6 +123,8 @@ class RiderWindow(Window):
         self.text_input = pyglet.gui.TextEntry("", x=self.width-30.0, y=self.height-15.0, width=100.0, batch=self.gui)
         self.push_handlers(self.text_input)
         self._last_text = ""
+
+        self._fraction = 0.0
 
     @property
     def selected_wav(self) -> str:
@@ -138,8 +140,10 @@ class RiderWindow(Window):
     def render_selected_wav(self):
         arcade.draw_rect_filled(LRBT(self.width * PANEL_START, self.width, 0, self.search_box.bottom - TEXT_OFFSET), IRIS_DARK)
         self.panel_text.draw()
-        arcade.draw_line_strip(self.waveform[:11], arcade.color.YELLOW, 5)
-        arcade.draw_line_strip(self.waveform[10:], arcade.color.WHITE, 5)
+        idx = int(self._fraction * len(self.waveform))
+
+        arcade.draw_line_strip(self.waveform[:max(0, idx - 1)], arcade.color.YELLOW, 5)
+        arcade.draw_line_strip(self.waveform[idx:], arcade.color.WHITE, 5)
 
     def setup_selected_wav(self):
         if self.player:
@@ -148,7 +152,7 @@ class RiderWindow(Window):
         path = self.directory + "/" + self.selected_wav
         self.show_sound = True
         self.sound = Sound(path)
-        self.player = self.sound.play()
+        self.player: pyglet.media.Player = self.sound.play()
 
         stem = self.selected_wav.split("\\")[-1]
         self.panel_text.font_size = get_panel_font_size(self, stem)
@@ -237,11 +241,19 @@ class RiderWindow(Window):
             else:
                 self.play_sound("blip_e")
             self._last_text = self.text_input.value
-        
+
         self.local_time += delta_time
         if not self.asked_folder and self.local_time > 1:
             self.ask_folder()
             self.get_wavs()
+
+        if self.player is None:
+            return
+        
+        if self.player.source is None:
+            self._fraction = 1.0
+        else:
+            self._fraction = self.player.time / self.player.source.duration
 
     def on_draw(self):
         self.clear(IRIS_HAIR)
