@@ -166,7 +166,7 @@ class RiderWindow(ExpWin):
         self.panel_text.draw()
         idx = int(self._fraction * len(self.waveform))
 
-        arcade.draw_line_strip(self.waveform[:max(0, idx - 1)], DIGI_BLUE, 5)
+        arcade.draw_line_strip(self.waveform[:min(len(self.waveform), idx + 1)], DIGI_BLUE, 5)
         arcade.draw_line_strip(self.waveform[idx:], arcade.color.WHITE, 5)
 
     def setup_selected_wav(self):
@@ -244,11 +244,12 @@ class RiderWindow(ExpWin):
 
         t = self.selection_text_camera.top_center
         b = self.selection_text_camera.bottom_center
+        o_p = self.selection_text_camera.position
 
         if self.wav_selected_text.bottom < b.y:
-            self.selection_text_camera.bottom_center = (b.x, self.wav_selected_text.bottom)
+            self.selection_text_camera.position = (o_p.x, self.wav_selected_text.y)
         elif self.wav_selected_text.top > t.y:
-            self.selection_text_camera.top_center = (t.x, self.wav_selected_text.top)
+            self.selection_text_camera.top_center = (o_p.x, self.wav_selected_text.y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == DOWN:
