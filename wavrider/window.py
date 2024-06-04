@@ -173,6 +173,9 @@ class RiderWindow(ExpWin):
         if self.player:
             self.player.delete()
 
+        if self.directory is None or not self.wavs:
+            return
+
         path = self.directory + "/" + self.selected_wav
         self.show_sound = True
         self.sound = Sound(path)
