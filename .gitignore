@@ -5,3 +5,9 @@
 *.pyc
 
 \temp
+
+# nuitka outputs
+/*.build
+/*.dist
+/*.onefile-build
+*.exe
