@@ -1,4 +1,5 @@
 from glob import glob
+import random
 from tkinter.filedialog import askdirectory
 import wave
 
@@ -7,7 +8,7 @@ import pyglet.gui
 
 from arcade import LRBT, Sound, Window, Text
 from arcade.key import A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE, \
-    UP, DOWN, BACKSPACE, DELETE, ENTER, \
+    UP, DOWN, DELETE, ENTER, \
     KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, \
     NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9
 from arcade.types import Color
@@ -19,11 +20,13 @@ from common.experimentwindow import ExpWin
 IRIS_PURPLE = Color.from_hex_string("9900B2")
 IRIS_DARK = Color.from_hex_string("5D007E")
 IRIS_HAIR = Color.from_hex_string("1A0024")
+DIGI_BLUE = Color.from_hex_string("0FCDF7")
 TEXT_OFFSET = 5
 SHOW_LIMIT = 20
 PANEL_START = 0.667
 PANEL_CENTER = (1 - PANEL_START) / 2 + PANEL_START
-FONT_NAME = "GohuFont 11 Nerd Font Mono"
+# FONT_NAME = "GohuFont 11 Nerd Font Mono"
+FONT_NAME = "Cervino Neue"  # NOTE TO DRAGON: THIS IS BECAUSE THIS IS IRIS' FONT
 
 letters = "abcdefghijklmnopqrstuvwxyz 01234567890123456789"
 letter_keys = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE,
@@ -35,6 +38,8 @@ letter_map = {
 
 
 def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100) -> list[tuple[float, float]]:
+    if path.endswith("mp3"):
+        return [(x + n, y + (random.random() * max_height)) for n in range(int(width))]
     with open(path, "rb") as f:
         wav = wave.open(f, "rb")
         sample_count = wav.getnframes()
@@ -143,7 +148,7 @@ class RiderWindow(ExpWin):
         self.panel_text.draw()
         idx = int(self._fraction * len(self.waveform))
 
-        arcade.draw_line_strip(self.waveform[:max(0, idx - 1)], arcade.color.YELLOW, 5)
+        arcade.draw_line_strip(self.waveform[:max(0, idx - 1)], DIGI_BLUE, 5)
         arcade.draw_line_strip(self.waveform[idx:], arcade.color.WHITE, 5)
 
     def setup_selected_wav(self):
@@ -184,7 +189,9 @@ class RiderWindow(ExpWin):
         self.directory_text.text = self.directory
 
     def get_wavs(self):
-        self._wavs = glob("**/*.wav", root_dir = self.directory, recursive = True)
+        self._wavs = []
+        for file_ext in ["wav", "mp3"]:
+            self._wavs.extend(glob(f"**/*.{file_ext}", root_dir = self.directory, recursive = True))
         self.wavs = self._wavs.copy()
         self.update_wav_text()
 
