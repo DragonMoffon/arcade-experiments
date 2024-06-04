@@ -6,7 +6,7 @@ import wave
 import numpy as np
 import pyglet.gui
 
-from arcade import LRBT, Sound, Window, Text
+from arcade import LRBT, Sound, Window, Text, Camera2D
 from arcade.key import A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE, \
     UP, DOWN, DELETE, ENTER, \
     KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, \
@@ -127,6 +127,9 @@ class RiderWindow(ExpWin):
 
         self.sfx: dict[str, arcade.Sound] = {s: load_shared_sound(s) for s in ("blip_a", "blip_c", "blip_e")}
 
+        self.directory_text_scissor_rect = LRBT(0, self.width, 0, self.directory_text.bottom)
+        self.selection_text_camera = Camera2D(scissor=self.directory_text_scissor_rect)
+
         self.gui: pyglet.shapes.Batch = pyglet.shapes.Batch()
         self.text_input = pyglet.gui.TextEntry("", x=self.width-30.0, y=self.height-15.0, width=100.0, batch=self.gui)
         self.push_handlers(self.text_input)
@@ -239,6 +242,14 @@ class RiderWindow(ExpWin):
 
         self.unsetup_selected_wav()
 
+        t = self.selection_text_camera.top_center
+        b = self.selection_text_camera.bottom_center
+
+        if self.wav_selected_text.bottom < b.y:
+            self.selection_text_camera.bottom_center = (b.x, self.wav_selected_text.bottom)
+        elif self.wav_selected_text.top > t.y:
+            self.selection_text_camera.top_center = (t.x, self.wav_selected_text.top)
+
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == DOWN:
             if self.selected_index < min(len(self.wavs) - 1, SHOW_LIMIT - 1):
@@ -286,9 +297,12 @@ class RiderWindow(ExpWin):
             return
 
         self.directory_text.draw()
-        self.wavs_before_text.draw()
-        self.wav_selected_text.draw()
-        self.wavs_after_text.draw()
+
+        with self.selection_text_camera.activate():
+            self.wavs_before_text.draw()
+            self.wav_selected_text.draw()
+            self.wavs_after_text.draw()
+        self.ctx.scissor = self.ctx.screen.viewport  # Bug fix because I forgor to update default camera with scissor
         self.search_box.draw()
 
         if self.show_sound:
