@@ -8,7 +8,7 @@ class ExpWin(Window):
         self._show_fps: bool = False
         self._average_length: int = 10
         self._fps_history: list = []
-        self._fps_text = Text("", x=self.width, y=self.height, anchor_x="right", anchor_y="top",
+        self._fps_text = Text("", x=self.width, y=0, anchor_x="right", anchor_y="bottom",
                               font_name="GohuFont 11 Nerd Font Mono")
 
     def show_fps(self, show: bool = False):

@@ -67,6 +67,8 @@ def get_panel_font_size(window: Window, s: str, max_size = 28) -> int:
 class RiderWindow(ExpWin):
     def __init__(self):
         super().__init__(1280, 720, "WavRider")
+        self.update_fps_text(n_x=self.width, n_y=0, n_y_anchor='bottom')
+
         self.local_time = 0.0
         self.directory = None
         self._wavs: list[str] = []
@@ -132,9 +134,22 @@ class RiderWindow(ExpWin):
 
         self._fraction = 0.0
 
+        self._volume = 0.5
+
     @property
     def selected_wav(self) -> str:
         return self.wavs[self.selected_index]
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        if self.player is None:
+            return
+
+        if scroll_y > 0.0:
+            self._volume = min(1.0, self._volume * 1.1)
+            self.player.volume = self._volume
+        elif scroll_y < 0.0:
+            self._volume = max(0.0, self._volume / 1.1)
+            self.player.volume = self._volume
 
     def play_sound(self, s: str):
         self.sfx[s].play()
@@ -158,7 +173,7 @@ class RiderWindow(ExpWin):
         path = self.directory + "/" + self.selected_wav
         self.show_sound = True
         self.sound = Sound(path)
-        self.player: pyglet.media.Player = self.sound.play()
+        self.player: pyglet.media.Player = self.sound.play(volume=self._volume)
 
         stem = self.selected_wav.split("\\")[-1]
         self.panel_text.font_size = get_panel_font_size(self, stem)
