@@ -22,7 +22,7 @@ IRIS_DARK = Color.from_hex_string("5D007E")
 IRIS_HAIR = Color.from_hex_string("1A0024")
 DIGI_BLUE = Color.from_hex_string("0FCDF7")
 TEXT_OFFSET = 5
-SHOW_LIMIT = 20
+SHOW_LIMIT = 10
 PANEL_START = 0.667
 PANEL_CENTER = (1 - PANEL_START) / 2 + PANEL_START
 # FONT_NAME = "GohuFont 11 Nerd Font Mono"
@@ -155,7 +155,7 @@ class RiderWindow(ExpWin):
             self.player.volume = self._volume
 
     def play_sound(self, s: str):
-        self.sfx[s].play()
+        self.sfx[s].play(volume=self._volume)
 
     def render_prompt(self):
         arcade.draw_rect_filled(LRBT(0, self.width, 0, self.height), IRIS_DARK)
@@ -196,7 +196,20 @@ class RiderWindow(ExpWin):
             self.player.delete()
 
     def get_searched_wavs(self, term: str) -> list[str]:
-        return [w for w in self._wavs if term in w.casefold()]
+        term_w_underscore = term.replace(" ", "_")
+        term_w_dash = term.replace(" ", "-")
+
+        def valid_search(file_src: str):
+            f = file_src.casefold()
+            return (
+                term in f
+                or
+                term_w_dash in f
+                or
+                term_w_underscore in f
+            )
+
+        return [w for w in self._wavs if valid_search(w)]
 
     def update_search(self):
         self.selected_index = 0
@@ -230,9 +243,9 @@ class RiderWindow(ExpWin):
 
         # Update text fields
         if self.selected_index != 0:
-            self.wavs_before_text.text = "\n".join(self.wavs[:self.selected_index])
+            self.wavs_before_text.text = "\n".join(self.wavs[max(0, self.selected_index-SHOW_LIMIT):self.selected_index])
         self.wav_selected_text.text = self.wavs[self.selected_index]
-        self.wavs_after_text.text = "\n".join(self.wavs[self.selected_index + 1:SHOW_LIMIT])
+        self.wavs_after_text.text = "\n".join(self.wavs[self.selected_index + 1:min(len(self.wavs), self.selected_index+SHOW_LIMIT)])
 
         # Positioning in the case that the selected item is the top item
         if self.selected_index == 0:
@@ -256,7 +269,7 @@ class RiderWindow(ExpWin):
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == DOWN:
-            if self.selected_index < min(len(self.wavs) - 1, SHOW_LIMIT - 1):
+            if self.selected_index < len(self.wavs) - 1:
                 self.selected_index += 1
                 self.update_wav_text()
                 self.play_sound("blip_a")
