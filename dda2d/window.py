@@ -4,8 +4,13 @@ from pyglet.math import Vec2
 from animator.lerp import ease_linear
 from dda2d.dda import dda
 from dda2d.grid import Grid
-from common.util import load_shared_sound, clamp
+from common.util import clamp, load_shared_sound
+from common.data_loading import make_package_path_finder
 # from common.util.duration_tracker import PERF_TRACKER, perf_timed
+
+import dda2d.data.sounds as sounds
+
+get_sounds_path = make_package_path_finder(sounds, "wav")
 
 GRID_X_SIZE = 525
 GRID_Y_SIZE = 525
@@ -27,7 +32,7 @@ class Application(arcade.Window):
                                 font_name="GohuFont 11 Nerd Font Mono", font_size=22,
                                 anchor_x = "center", anchor_y = "center")
 
-        self.ambience = load_shared_sound("ambience")
+        self.ambience = arcade.load_sound(get_sounds_path("ambience"), False)
 
         self.cursor = Vec2(-100, -100)
         self.start_point = Vec2(-100, -100)
