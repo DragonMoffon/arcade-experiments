@@ -1,10 +1,24 @@
 from arcade import Vec2
 
 
+class Table:
+
+    def __init__(self, name: str, definition: tuple[float]):
+        self._name: str = ""
+        self._definition: tuple[type, ...] = ()
+        self._map: dict[int, tuple] = dict()
+
+    def __getitem__(self, item: int):
+        return self._map[item]
+
+    def __iter__(self):
+        pass
+
+
 class World:
 
     def __init__(self):
-        pass
+        self._tables: dict[str, dict[int, tuple]]
 
 
 class RigidOrigin:
