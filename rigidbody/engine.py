@@ -4,28 +4,6 @@ from arcade import Vec2
 class World:
 
     def __init__(self):
-        self._tables_definitions: dict[str, tuple[type, ...]] = {}  # Map the table name to the types of its "columns"
-        self._tables: dict[str, dict[int, tuple[int, ...]]] = {}  # Map the table name to the physical table
-        self._components: dict[type, list] = {}  # Contiguous arrays of components
-        self._constructs: tuple[int, ...] = ()  # Contiguous array of all the construct UUIDs
-
-    def define_table(self, definition: frozenset[type], title: str):
-        pass
-
-    def get_table_content(self, table: str):
-        table_content = self._tables_definitions[table]
-        table = self._tables[table]
-
-        for row in table.values():
-            yield (self._components[t][idx] for t, idx in zip(table_content, row))
-
-    def add_component(self, construct: int, component: type, *args, **kwargs):
-        pass
-
-    def remove_component(self, construct: int, component: type):
-        pass
-
-    def check_tables(self, construct: int):
         pass
 
 
@@ -69,3 +47,7 @@ class BorderCircle:
 
     def __init__(self):
         pass
+
+
+if __name__ == '__main__':
+    world = World()
