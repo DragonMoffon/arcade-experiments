@@ -39,7 +39,10 @@ letter_map = {
 
 def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100) -> list[tuple[float, float]]:
     if path.endswith("mp3"):
+        # cringe waveform
         return [(x + n, y + (random.random() * max_height)) for n in range(int(width))]
+    
+    # based waveform
     with open(path, "rb") as f:
         wav = wave.open(f, "rb")
         sample_count = wav.getnframes()
@@ -119,8 +122,6 @@ class RiderWindow(ExpWin):
         self.asked_folder = False
         self.show_sound = False
 
-        self.search_term = ""
-
         self.sound = None
         self.player: pyglet.media.Player = None
         self.waveform = []
@@ -166,8 +167,8 @@ class RiderWindow(ExpWin):
         self.panel_text.draw()
         idx = int(self._fraction * len(self.waveform))
 
-        arcade.draw_line_strip(self.waveform[:min(len(self.waveform), idx + 1)], DIGI_BLUE, 5)
-        arcade.draw_line_strip(self.waveform[idx:], arcade.color.WHITE, 5)
+        arcade.draw_line_strip(self.waveform[:min(len(self.waveform), idx + 1)], DIGI_BLUE, 3)
+        arcade.draw_line_strip(self.waveform[idx:], arcade.color.WHITE, 3)
 
     def setup_selected_wav(self):
         if self.player:
@@ -237,7 +238,7 @@ class RiderWindow(ExpWin):
 
         if not self.wavs:
             self.wavs_before_text.text = ""
-            self.wav_selected_text.text = f"No files with '{self.search_term}' found!"
+            self.wav_selected_text.text = f"No files with '{self.text_input.value}' found!"
             self.wavs_after_text.text = ""
             return
 
