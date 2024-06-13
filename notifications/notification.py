@@ -10,7 +10,7 @@ Possibly:
     If we make Notifier and Notification inheritable types you could make notifications statically typed,
     but it means that the developer has to hand-write the typing for every notification.
 
-    It could be as simple as making Notifier subclass TypedDict so when we fetch a spceific notifcation
+    It could be as simple as making Notifier subclass TypedDict so when we fetch a specific notifcation
     we know exactly what types
 """
 # from typing import TypedDict, Callable
@@ -74,9 +74,15 @@ Possibly:
 #
 # notifications['kill'].push(0.9)
 
-from typing import Callable, Any
+from typing import Callable, Any, Hashable, NamedTuple, Optional
 from enum import IntEnum
 import inspect
+
+
+class NotificationCaller(NamedTuple):
+    line: int
+    function_name: str
+    caller: Optional[object] = None
 
 
 class NotificationCreateMode(IntEnum):
@@ -88,37 +94,60 @@ class NotificationCreateMode(IntEnum):
 
 class Notifier:
 
-    def __init__(self):
-        self._create_mode: NotificationCreateMode = NotificationCreateMode.BOTH
-        self._notifications: dict[str, list] = {}
-        self._defaults: dict[str, dict[str, Any]] = {}
+    def __init__(self, mode: NotificationCreateMode = NotificationCreateMode.BOTH):
+        self._create_mode: NotificationCreateMode = mode
+        self._notifications: dict[Hashable, list[Callable]] = {}
+        self._defaults: dict[Hashable, dict[str, Any]] = {}
+        self._callable_signatures: dict[Callable, tuple] = {}
 
-        self._notification_cache: list[tuple[str, dict[str, Any]]] = []
+        self._notification_cache: list[tuple[Hashable, dict[str, Any]]] = []
 
-    def create_notification(self, name_: str, **kwargs):
+    def clean_up_signatures(self):
+        all_active_listeners = set(sum(self._notifications.values(), start=[]))
+        self._callable_signatures = {listener: cache for listener, cache in self._callable_signatures.items() if listener in all_active_listeners}
+
+    def create_notification(self, name_: Hashable, **defaults):
         if name_ in self._notifications:
             raise ValueError("notification already exists")
 
         self._notifications[name_] = []
-        self._defaults[name_] = kwargs
+        self._defaults[name_] = defaults
 
-    def does_notification_exist(self, notification_: str):
+    def delete_notification(self, name_: Hashable):
+        del self._notifications[name_]
+        del self._defaults[name_]
+
+        self._notification_cache = filter(lambda item: item[0] != name_, self._notification_cache)
+
+    def does_notification_exist(self, notification_: Hashable):
         return notification_ in self._notifications
 
-    def add_listener(self, notification_: str, listener_: Callable):
+    def add_listener(self, notification_: Hashable, listener_: Callable):
         if notification_ not in self._notifications and NotificationCreateMode.LISTENER & self._create_mode:
             self.create_notification(notification_)
         if listener_ in self._notifications[notification_]:
             return
+
+        if listener_ not in self._callable_signatures:
+            self._callable_signatures[listener_] = tuple(inspect.signature(listener_).parameters)
+
         self._notifications[notification_].append(listener_)
 
-    def push_notification(self, notification_, immediate_: bool = False, **kwargs):
+    def remove_listener(self, notification_: Hashable, listener_: Callable):
+        self._notifications[notification_].remove(listener_)
+
+    def push_notification(self, notification_: Hashable, immediate_: bool = False, **arguments_):
+        if 'caller' not in arguments_:
+            frame_code = inspect.currentframe().f_back
+            f_name = frame_code.f_code.co_name
+            arguments_['caller'] = NotificationCaller(frame_code.f_lineno, f_name if f_name != '<module>' else None, frame_code.f_locals.get('self', None))
+
         if notification_ not in self._notifications and NotificationCreateMode.PUSH & self._create_mode:
-            self.create_notification(notification_, **kwargs)
+            self.create_notification(notification_, **arguments_)
         if immediate_:
-            self._dispatch_notification(notification_, kwargs)
+            self._dispatch_notification(notification_, arguments_)
         else:
-            self._notification_cache.append((notification_, kwargs))
+            self._notification_cache.append((notification_, arguments_))
 
     def push_cache(self):
         if not self._notification_cache:
@@ -129,39 +158,15 @@ class Notifier:
         # so we don't get that delay we had to worry about?
         # We could get an infinite loop which would be bad so maybe not.
 
-        for notification, arguments in self._notification_cache[:]:
-            self._dispatch_notification(notification, arguments)
+        notification_cache = self._notification_cache[:]
         self._notification_cache = []
+
+        for notification, arguments in notification_cache:
+            self._dispatch_notification(notification, arguments)
 
     def _dispatch_notification(self, notification_, arguments_: dict[str, Any]):
         # TODO: add try loop to make exceptions more obvious
         defaults = self._defaults[notification_]
         for listener in self._notifications[notification_]:
-            kwargs = {parameter: arguments_.get(parameter, None) if parameter in arguments_ else defaults[parameter] for parameter in inspect.signature(listener).parameters if parameter in arguments_ or parameter in defaults}
+            kwargs = {parameter: arguments_.get(parameter, None) if parameter in arguments_ else defaults[parameter] for parameter in self._callable_signatures[listener] if parameter in arguments_ or parameter in defaults}
             listener(**kwargs)
-
-
-def player_enable(time: float):
-    print("player", time)
-
-
-def enemy_enable():
-    print("enemy")
-
-
-notifier = Notifier()
-
-notifier.create_notification("enable", time=100.0)
-notifier.add_listener("enable", player_enable)
-notifier.add_listener("enable", enemy_enable)  # Even though enemy_enable has no arguments that isn't an issue
-
-notifier.push_notification("enable")  # with no time kwarg so use default
-notifier.push_notification("enable", time=20.0)  # with a time kwarg so ignore default
-
-print("Before notifications 1")
-notifier.push_cache()
-print("After notifications 1")
-notifier.push_notification("enable", True, time=10.0)  # with immediate as true
-print("Before notifications 2")
-notifier.push_cache()  # No notifications get called because the only one since last push_cache was immediate
-print("After notifications 2")

@@ -17,23 +17,28 @@ I.E. if the player walks on sand and then steps onto cobble they could both outp
 we know where it is from we can query what material the player just stepped on. (We could also do the query before
 the notification, but this increases the amount of work the player animator has to do)
 """
+from arcade import SpriteList, get_sprites_at_point
 
+from notifications.notification import Notifier
+from notifications.environment import EnivroArea
+from common.data_loading import make_package_path_finder
+from common.util import load_shared_sound
+
+from arcade import get_window, load_sound
 from enum import IntEnum
 from pyglet.math import Vec2
+from pyglet.media import Player
 
+import notifications.data.audio as audio_src
+
+get_audio_path = make_package_path_finder(audio_src, ".wav")
+load_audio = lambda name: load_sound(get_audio_path(name))
 
 class AudioChannel(IntEnum):
     GLOBAL = 0b0001
     SFX = 0b0010
     MUSIC = 0b0100
     GUI = 0b1000
-    ALL = 0b1111
-
-
-class Audio:
-
-    def __init__(self):
-        pass
 
 
 class AudioListener:
@@ -45,11 +50,40 @@ class AudioListener:
     but for the demo I am assuming only the player is a listener
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, environment: SpriteList[EnivroArea]):
+        notif: Notifier = get_window().notifier
 
-    def on_play_audio(self, audio: Audio, location: Vec2):
-        pass
+        notif.add_listener('play-audio', self.on_play_audio)
 
-    def on_update_volume(self, channel: AudioChannel):
+        self._players: list[Player] = list()
+        self.environment: SpriteList[EnivroArea] = environment
+
+        self.step_audio = {
+            'a': load_shared_sound('blip_a'),
+            'b': load_shared_sound('blip_c')
+        }
+        self.hurt_sound = load_shared_sound('blip_e')
+
+    def on_play_audio(self, track: str, channel: AudioChannel, location: Vec2):
+        match channel:
+            case AudioChannel.GLOBAL:
+                pass
+
+            case AudioChannel.GUI:
+                pass
+
+            case AudioChannel.SFX:
+                if track == 'player-step':
+                    current_env = get_sprites_at_point(location, self.environment)
+                    material = 'a' if not current_env else current_env[0].material
+                    self._players.append(self.step_audio.get(material, self.step_audio['a']).play())
+                elif track == 'player-hurt':
+                    self._players.append(self.hurt_sound.play())
+
+            case AudioChannel.MUSIC:
+                pass
+
+        self._players = list(filter(lambda p: p.playing, self._players))
+
+    def on_update_volume(self, channel: AudioChannel, new_volume: AudioChannel):
         pass

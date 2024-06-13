@@ -10,8 +10,11 @@ from sphere.window import main as sphere_main
 from heightviz.window import main as height_main
 from heightviz2d.window import main as height2d_main
 from rectdemo.window import main as rect_main
+from wavrider.window import main as wav_main
+from notifications.window import main as notif_main
+
+# TODO
 from rigidbody.window import main as rigid_main
-from wavrider.window import main as wavmain
 
 if __name__ == '__main__':
     load_shared_font("gohu")
@@ -19,14 +22,14 @@ if __name__ == '__main__':
         {
             "DDA 2D": (dda2d_main, (), {}),
             "DDA 3D": (dda3d_main, (), {}),
+            "Rect Demo": (rect_main, (), {}),
+            "Notification Demo": (notif_main, (), {}),
             "Marching Squares": (square_main, (), {}),
             "Multi-Variable Sorting": (mvs_main, (), {}),
             "Automatic Animator": (animator_main, (), {}),
             "Sphere 3D": (sphere_main, (), {}),
             "Scale Visualizer 2D": (height2d_main, (), {}),
             "Scale Visualizer 3D": (height_main, (), {}),
-            "Rect Demo": (rect_main, (), {}),
-            "Rigid Body Sim 2D": (rigid_main, (), {}),
-            "WavRider": (wavmain, (), {"show_fps": True})
+            "WavRider": (wav_main, (), {"show_fps": True})
         }
     )
