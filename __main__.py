@@ -11,7 +11,7 @@ from heightviz.window import main as height_main
 from heightviz2d.window import main as height2d_main
 from rectdemo.window import main as rect_main
 from wavrider.window import main as wav_main
-from notifications.window import main as notif_main
+# from notifications.window import main as notif_main
 from pool.window import main as pool_main
 
 # TODO
@@ -25,7 +25,7 @@ if __name__ == '__main__':
             "DDA 2D": (dda2d_main, (), {}),
             "DDA 3D": (dda3d_main, (), {}),
             "Rect Demo": (rect_main, (), {}),
-            "Notification Demo": (notif_main, (), {}),
+            # "Notification Demo": (notif_main, (), {}),
             "Marching Squares": (square_main, (), {}),
             "Multi-Variable Sorting": (mvs_main, (), {}),
             "Automatic Animator": (animator_main, (), {}),

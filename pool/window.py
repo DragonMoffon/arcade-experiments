@@ -1,25 +1,19 @@
 from random import random, choices
 from typing import Callable
 
-from arcade.experimental.input import MouseButtons, Keys
 from arcade import (
     Sound,
-    SpriteSolidColor,
     Sprite,
     SpriteList,
     Rect,
     XYWH,
     Text,
     draw_rect_outline,
-    draw_rect_filled,
-    draw_circle_outline,
     draw_lines,
-    draw_point,
-    MOUSE_BUTTON_LEFT,
     load_texture
 )
 
-from common.util import ProceduralAnimator, load_shared_sound
+from common.util import load_shared_sound
 from common.data_loading import make_package_path_finder
 from common.experimentwindow import ExpWin
 
@@ -49,32 +43,13 @@ def generate_notes():
     yield 0, t
     while loop:
         lane = choices(lanes, weights)[0]
-        t += 0.5
+        t += 0.05
         loop = (yield lane, t)
     yield None
 
 
 def pick_point_in_rect(rect: Rect) -> tuple[float, float]:
     return rect.left + random() * rect.width, rect.bottom + random() * rect.height
-
-
-def pick_point_along_rect(rect: Rect, d_x: float, d_y: float) -> tuple[float, float]:
-    along_y = choices((True, False), weights=(abs(d_x), abs(d_y)))
-    print(along_y)
-    if along_y:
-        x = rect.left + random() * rect.width
-        if d_y > 0:
-            y = rect.bottom
-        else:
-            y = rect.top
-        return x, y
-    y = rect.bottom + random() * rect.height
-    if d_x > 0:
-        x = rect.left
-    else:
-        x = rect.right
-
-    return x, y
 
 
 class PoolWindow(ExpWin):
@@ -162,7 +137,7 @@ class PoolWindow(ExpWin):
                 self._sprite_pool.give(sprite)
                 sprite.position = pick_point_in_rect(self._deposit_bounds)
                 sprite.texture = self._textures[-1]
-                self._deposit_sound.play(0.05)
+                self._deposit_sound.play(0.25)
                 print(f'{(self._t - sprite.t) * 1000: .0f}')
 
         if self._t >= self._next_speed_time:
@@ -185,13 +160,13 @@ class PoolWindow(ExpWin):
             ),
             (255, 0, 0, 255)
         )
-        l = self._fall_bounds.left
-        w = self._fall_bounds.width
+        left = self._fall_bounds.left
+        width = self._fall_bounds.width
         draw_lines(
             (
-                (l + LANE_FRACTION * w, self._fall_bounds.top), (l + LANE_FRACTION * w, self._fall_bounds.bottom),
-                (l + LANE_FRACTION * 2 * w, self._fall_bounds.top), (l + LANE_FRACTION * 2 * w, self._fall_bounds.bottom),
-                (l + LANE_FRACTION * 3 * w, self._fall_bounds.top), (l + LANE_FRACTION * 3 * w, self._fall_bounds.bottom),
+                (left + LANE_FRACTION * width, self._fall_bounds.top), (left + LANE_FRACTION * width, self._fall_bounds.bottom),
+                (left + LANE_FRACTION * 2 * width, self._fall_bounds.top), (left + LANE_FRACTION * 2 * width, self._fall_bounds.bottom),
+                (left + LANE_FRACTION * 3 * width, self._fall_bounds.top), (left + LANE_FRACTION * 3 * width, self._fall_bounds.bottom),
             ),
             (100, 100, 100, 255)
         )
