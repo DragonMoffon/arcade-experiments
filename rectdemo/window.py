@@ -33,7 +33,6 @@ class RectWindow(Window):
 
     def __init__(self):
         super().__init__(1280, 720, "Rect Demo")
-
         self.rectangle = self.rect.scale(0.75)
 
         self.text_batch = Batch()

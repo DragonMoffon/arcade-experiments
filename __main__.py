@@ -12,6 +12,7 @@ from heightviz2d.window import main as height2d_main
 from rectdemo.window import main as rect_main
 from wavrider.window import main as wav_main
 from notifications.window import main as notif_main
+from pool.window import main as pool_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     load_shared_font("gohu")
     main(
         {
+            "Pool Demo [TEMP LOCATION]": (pool_main, (), {"show_fps": True}),
             "DDA 2D": (dda2d_main, (), {}),
             "DDA 3D": (dda3d_main, (), {}),
             "Rect Demo": (rect_main, (), {}),
