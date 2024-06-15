@@ -43,7 +43,7 @@ def generate_notes():
     yield 0, t
     while loop:
         lane = choices(lanes, weights)[0]
-        t += 0.05
+        t += 0.25
         loop = (yield lane, t)
     yield None
 
