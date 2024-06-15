@@ -61,14 +61,6 @@ class Pool[T]:
         self._free_idx += 1
         return item
 
-    def get_idx(self) -> int:
-        if self._free_idx >= self._size:
-            raise IndexError('No free items to return')
-
-        idx = self._free_idx
-        self._free_idx += 1
-        return idx
-
     def give(self, item: T):
         idx = self._source.index(item)
         if idx >= self._free_idx:
@@ -76,10 +68,3 @@ class Pool[T]:
 
         self._free_idx -= 1
         self._source[self._free_idx], self._source[idx] = item, self._source[self._free_idx]
-
-    def give_idx(self, idx: int):
-        if idx >= self._free_idx:
-            return ValueError('trying to return an item which was already returned')
-
-        self._free_idx -= 1
-        self._source[self._free_idx], self._source[idx] = self._source[idx], self._source[self._free_idx]

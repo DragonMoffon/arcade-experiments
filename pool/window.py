@@ -35,6 +35,47 @@ GRAVITY_MAX = 200.0
 LANE_FRACTION = 1.0 / 4.0
 
 
+class ValueSlider:
+
+    def __init__(self, x: float, y: float, width: int, height: int, min_: float, max_: float, curr_: float):
+        self._h_w = width / 2.0
+        self.w = width
+        self.h = height
+        self.max = max_
+        self.min = min_
+        self.curr = curr_
+        self._fraction = height / (max_ - min_)
+        self._slider_rect: Rect = XYWH(x, y, width, height + width)
+        self._slider_select: Rect = XYWH(x, self._slider_rect.bottom + (curr_ - min_) * self._fraction + self._h_w, width, width)
+
+    def draw(self):
+        draw_rect_filled(self._slider_rect, (100, 100, 100, 255))
+        draw_rect_outline(self._slider_select, (255, 255, 255, 255))
+
+    def hovers(self, x, y):
+        return self._slider_select.point_in_rect((x, y))
+
+    def _control(self, x, y, dx, dy):
+        pass
+
+    def control(self, x, y, dx, dy):
+        self._control(x, y, dx, dy)
+        ny = self._slider_rect.bottom + self._h_w + (self.curr - self.min) * self._fraction
+        self._slider_select = self._slider_select.align_y(ny)
+
+
+class ANoteSpeedSlider(ValueSlider):
+
+    def __init__(self, win: ExpWin, x, y, min_, max_, key: str):
+        super().__init__(x, y, 10, 200, min_, max_, win._speed[key])
+        self.win: ExpWin = win
+        self.key: str = key
+
+    def _control(self, x, y, dx, dy):
+        self.curr = max(self.min, min(self.max, self.curr + dy / self._fraction))
+        self.win._speed[self.key] = self.curr
+
+
 def generate_notes():
     t = 0.0
     lanes = (0, 1, 2, 3)  # lanes 1-4 with 5 being a note-speed event
@@ -94,8 +135,34 @@ class PoolWindow(ExpWin):
         self._next_note_speed: float = 100 + (900 - (self._note_speed - 100))
         self._t_offset: float = (self._fall_bounds.height + 25) / self._note_speed
 
+        self._speed_pick = ['a', 'b']
+        self._speed = {
+            'a': 100,
+            'b': 1000
+        }
+
         self._time_text: Text = Text(f'{self._t: .3f}', x=self._fall_bounds.right + 5, y=self._fall_bounds.y,
                                      anchor_x='left', anchor_y='center')
+
+        self._slider_a: ANoteSpeedSlider = ANoteSpeedSlider(self, self.width - 225, self.center_y + 150, 100, 1000, 'a')
+        self._slider_b: ANoteSpeedSlider = ANoteSpeedSlider(self, self.width - 175, self.center_y + 150, 100, 1000, 'b')
+        self._sliders: tuple[ValueSlider, ...] = (self._slider_a, self._slider_b)
+        self._slider_control: Callable[[float, float, float, float], None] = None
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        if button & MOUSE_BUTTON_LEFT:
+            for slider in self._sliders:
+                if slider.hovers(x, y):
+                    self._slider_control = slider.control
+                    break
+
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+        if button & MOUSE_BUTTON_LEFT:
+            self._slider_control = None
+
+    def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
+        if self._slider_control:
+            self._slider_control(x, y, dx, dy)
 
     def on_update(self, delta_time: float):
         # `gravity` here is just velocity not acceleration, but eh we could use the sprite's change x and y ;-;
@@ -144,7 +211,8 @@ class PoolWindow(ExpWin):
             print('switched')
             self._next_speed_time += 15.0
             self._note_speed = self._next_note_speed
-            self._next_note_speed = 100 + (900 - (self._note_speed - 100))
+            self._speed_pick = self._speed_pick[::-1]
+            self._next_note_speed = self._speed[self._speed_pick[0]]
             self._t_offset = (self._fall_bounds.height + 25) / self._note_speed
 
     def on_draw(self):
@@ -174,6 +242,9 @@ class PoolWindow(ExpWin):
 
         self._sprites.draw(pixelated=True)
         self._time_text.draw()
+
+        self._slider_a.draw()
+        self._slider_b.draw()
 
 
 def main(show_fps: bool):
