@@ -9,6 +9,7 @@ from arcade import (
     XYWH,
     Text,
     draw_rect_outline,
+    draw_rect_filled,
     draw_lines,
     load_texture
 )
