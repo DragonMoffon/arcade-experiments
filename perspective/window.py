@@ -1,4 +1,4 @@
-from arcade import Window, Vec2, draw_commands, key, window_commands, Texture
+from arcade import LBWH, Window, Vec2, draw, key, window_commands, Texture
 import pyglet
 import pyautogui
 
@@ -48,23 +48,28 @@ class PerpWindow(Window):
 
     def on_draw(self):
         self.clear()
-        draw_commands.draw_lbwh_rectangle_textured(0, 0, self.width, self.height, self._tex)
+        draw.draw_texture_rect(self._tex, LBWH(0, 0, self.width, self.height))
         a, b, c, d = self._grid.points
         e = sum((a, b, c, d), start=Vec2()) / 4
 
-        draw_commands.draw_line_strip(
+        draw.draw_line_strip(
             (a, b, d, c, a),
             (255, 255, 255, 255)
         )
-        draw_commands.draw_points(
+        draw.draw_points(
             tuple(self._grid.grid),
             (255, 0, 0, 255)
         )
-        draw_commands.draw_point(
+        draw.draw_point(
             e.x, e.y,
             (255, 255, 0, 255),
             4
         )
+
+    def do_clicks(self):
+        # TODO: Lists of spans from points
+        for point in self._grid.grid:
+            pyautogui.leftClick(int(point.x), int(self.screen_height - point.y), logScreenshot=False, interval=0.0, duration=0.0)
     
 
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: int, modifiers: int):
@@ -102,8 +107,7 @@ class PerpWindow(Window):
             self.close()
         elif symbol == key.ENTER:
             self.minimize()
-            for point in self._grid.grid:
-                pyautogui.leftClick(int(point.x), int(self.screen_height - point.y), logScreenshot=False, interval=0.0, duration=0.0)
+            self.do_clicks()
             self.maximize()
         elif symbol == key.SPACE:
             self.minimize()
