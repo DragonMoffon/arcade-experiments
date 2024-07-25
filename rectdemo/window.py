@@ -1,5 +1,5 @@
 from arcade import Text, Window, Rect, draw_line
-from arcade.draw_commands import draw_rect_outline, draw_point
+from arcade.draw import draw_rect_outline, draw_point
 from arcade.types import Point2
 import arcade.color
 

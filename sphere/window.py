@@ -1,7 +1,7 @@
 import math
 
 from arcade import SpriteList, Window, camera, key, Sprite
-from arcade.draw_commands import get_image
+from arcade.screenshot import get_image
 
 from common.data_loading import make_package_path_finder
 from common.util import clamp

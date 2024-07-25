@@ -95,7 +95,7 @@ class Grid:
             arcade.draw_line(self.x_offset, cur_y, self.max_x, cur_y, color, line_width)
             cur_y += self.tile_size
 
-        self.pulse_sprite.draw()
+        arcade.draw.draw_sprite(self.pulse_sprite)
 
     def get_lrbt(self, point: Vec2) -> tuple[float, float, float, float]:
         return (point.x - (self.tile_size / 2), point.x + (self.tile_size / 2),

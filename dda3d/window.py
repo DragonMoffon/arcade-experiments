@@ -1,4 +1,4 @@
-from arcade import Window, camera, draw_commands, SpriteSolidColor, SpriteList
+from arcade import Window, camera, draw, SpriteSolidColor, SpriteList
 from pyglet.math import Vec3
 
 from dda3d.dda import dda
@@ -55,13 +55,13 @@ class DDA3DWindow(Window):
         self.clear()
         self._camera.use()
         self._grid_sprites.draw()
-        draw_commands.draw_line(
+        draw.draw_line(
             self._ray_pos[0] * SQUARE_SIZE, self._ray_pos[1] * SQUARE_SIZE,
             (self._ray_pos[0] + self._ray_dir[0]*self._ray_len) * SQUARE_SIZE,
             (self._ray_pos[1] + self._ray_dir[1]*self._ray_len) * SQUARE_SIZE,
             color=(255, 0, 0, 255)
         )
-        draw_commands.draw_point(self._ray_pos[0]*SQUARE_SIZE, self._ray_pos[1]*SQUARE_SIZE, (255, 0, 0, 255), 2)
+        draw.draw_point(self._ray_pos[0]*SQUARE_SIZE, self._ray_pos[1]*SQUARE_SIZE, (255, 0, 0, 255), 2)
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int):
         n_x, n_y, _ = self._camera.unproject((x, y))

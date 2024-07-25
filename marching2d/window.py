@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import arcade
-from arcade.experimental.input.inputs import MouseButtons
-from arcade.draw_commands import draw_triangle_filled
+from arcade.future.input.inputs import MouseButtons
+from arcade.draw import draw_triangle_filled
 
 from common.util.procedural_animator import ProceduralAnimator
 

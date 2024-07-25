@@ -1,6 +1,6 @@
 from math import cos, pi
 from arcade import Window, SpriteList, Sprite, SpriteSolidColor, SpriteCircle, LRBT
-from arcade.experimental.input import Keys
+from arcade.future.input import Keys
 
 from pyglet.math import Vec2
 
