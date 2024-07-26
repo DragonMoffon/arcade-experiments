@@ -58,7 +58,7 @@ class PerpWindow(Window):
         )
         draw.draw_points(
             tuple(self._grid.grid),
-            (255, 0, 0, 255)
+            (255, 0, 0, 255), 5
         )
         draw.draw_point(
             e.x, e.y,
