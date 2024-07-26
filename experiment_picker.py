@@ -23,15 +23,17 @@ class ExperimentPickerWindow(arcade.Window):
         self._text_batch = pyglet.shapes.Batch()
         self._text = []
         text_start = 0
-        max_right = float("inf")
+        max_right = -float("inf")
+        max_left = float('inf')
         for experiment in experiments:
             t = arcade.Text(experiment, 0, text_start, font_name="GohuFont 11 Nerd Font Mono", font_size=22, batch=self._text_batch, anchor_x="center", anchor_y="center")
             self._text.append(t)
             text_start = t.bottom - 10
-            max_right = min(t.right, max_right)
+            max_right = max(t.right, max_right)
+            max_left = min(t.left, max_left)
 
-        self._selector_left = arcade.Text(">", int(max_right) - 10, 0, font_name="GohuFont 11 Nerd Font Mono", font_size=22, batch=self._text_batch, anchor_x="right", anchor_y="center")
-        self._selector_right = arcade.Text("<", 10 - int(max_right), 0, font_name="GohuFont 11 Nerd Font Mono", font_size=22, batch=self._text_batch, anchor_x="left", anchor_y="center")
+        self._selector_left = arcade.Text(">", int(max_left) - 10, 0, font_name="GohuFont 11 Nerd Font Mono", font_size=22, batch=self._text_batch, anchor_x="right", anchor_y="center")
+        self._selector_right = arcade.Text("<", int(max_right) + 10, 0, font_name="GohuFont 11 Nerd Font Mono", font_size=22, batch=self._text_batch, anchor_x="left", anchor_y="center")
         self._title_text = arcade.Text("Arcade Experiments", int(self.center_x), self.height-10, font_name="GohuFont 11 Nerd Font Mono", font_size=40, anchor_x="center", anchor_y="top")
 
     def on_draw(self):
