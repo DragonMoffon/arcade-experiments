@@ -1,4 +1,5 @@
 from glob import glob
+import os
 import random
 from tkinter.filedialog import askdirectory
 import wave
@@ -7,13 +8,11 @@ import numpy as np
 import pyglet.gui
 
 from arcade import LRBT, Sound, Window, Text, Camera2D
-from arcade.key import A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE, \
-    UP, DOWN, DELETE, ENTER, \
-    KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, \
-    NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9
+from arcade.key import UP, DOWN, DELETE, ENTER, NUM_ADD, NUM_SUBTRACT, O, SPACE
 from arcade.types import Color
 import arcade.color
 
+from animator.lerp import ease_linear, find_percent, lerp
 from common.util import load_shared_sound
 from common.experimentwindow import ExpWin
 
@@ -28,17 +27,9 @@ PANEL_CENTER = (1 - PANEL_START) / 2 + PANEL_START
 # FONT_NAME = "GohuFont 11 Nerd Font Mono"
 FONT_NAME = "Cervino Neue"  # NOTE TO DRAGON: THIS IS BECAUSE THIS IS IRIS' FONT
 
-letters = "abcdefghijklmnopqrstuvwxyz 01234567890123456789"
-letter_keys = [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, SPACE,
-               KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
-               NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9]
-letter_map = {
-    letters[idx]: letter_keys[idx] for idx in range(len(letters))
-}
-
 
 def gen_waveform(path: str, width: int, x: int = 0, y: int = 0, max_height = 100) -> list[tuple[float, float]]:
-    if path.endswith("mp3"):
+    if path.endswith("mp3") or path.endswith("ogg"):
         # cringe waveform
         return [(x + n, y + (random.random() * max_height)) for n in range(int(width))]
     
@@ -118,6 +109,14 @@ class RiderWindow(ExpWin):
                                 anchor_x = "center", anchor_y = "center",
                                 align = "center", width = self.width * (1 - PANEL_START),
                                 multiline = True)
+        
+        self.volume_text = Text("100%", self.center_x, self.center_y,
+                                font_name = FONT_NAME, font_size = 100,
+                                anchor_x = "center", anchor_y = "center",
+                                align = "center")
+        
+        self.volume_shown = float("inf")
+        self.volume_color = Color(255, 255, 255, 127)
 
         self.asked_folder = False
         self.show_sound = False
@@ -143,17 +142,21 @@ class RiderWindow(ExpWin):
     @property
     def selected_wav(self) -> str:
         return self.wavs[self.selected_index]
+    
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> bool | None:
+        self.text_input.focus = y > self.height - 30
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        if self.player is None:
-            return
-
-        if scroll_y > 0.0:
-            self._volume = min(1.0, self._volume * 1.1)
-            self.player.volume = self._volume
-        elif scroll_y < 0.0:
-            self._volume = max(0.0, self._volume / 1.1)
-            self.player.volume = self._volume
+        if scroll_y > 0:
+            if self.selected_index < len(self.wavs) - 1:
+                self.selected_index += 1
+                self.update_wav_text()
+                # self.play_sound("blip_a")
+        else:
+            if self.selected_index > 0:
+                self.selected_index -= 1
+                self.update_wav_text()
+                # self.play_sound("blip_a")
 
     def play_sound(self, s: str):
         self.sfx[s].play(volume=self._volume)
@@ -225,7 +228,7 @@ class RiderWindow(ExpWin):
 
     def get_wavs(self):
         self._wavs = []
-        for file_ext in ["wav", "mp3"]:
+        for file_ext in ["wav", "mp3", "ogg"]:
             self._wavs.extend(glob(f"**/*.{file_ext}", root_dir = self.directory, recursive = True))
         self.wavs = self._wavs.copy()
         self.update_wav_text()
@@ -268,24 +271,42 @@ class RiderWindow(ExpWin):
         elif self.wav_selected_text.top > t.y:
             self.selection_text_camera.top_center = (o_p.x, self.wav_selected_text.y)
 
+    def update_volume(self, up = False):
+        if up:
+            self._volume = min(1.0, self._volume + 0.05)
+        else:
+            self._volume = max(0.0, self._volume - 0.05)
+        if self.player:
+            self.player.volume = self._volume
+        self.volume_text.text = f"{self._volume * 100:.0f}%"
+        self.volume_shown = self.local_time
+
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == DOWN:
             if self.selected_index < len(self.wavs) - 1:
                 self.selected_index += 1
                 self.update_wav_text()
-                self.play_sound("blip_a")
+                # self.play_sound("blip_a")
         elif symbol == UP:
             if self.selected_index > 0:
                 self.selected_index -= 1
                 self.update_wav_text()
-                self.play_sound("blip_a")
+                # self.play_sound("blip_a")
         elif symbol == DELETE:
             self.text_input.value = ""
         elif symbol == ENTER:
             self.setup_selected_wav()
+        if not self.text_input.focus:
+            if symbol == NUM_ADD:
+                self.update_volume(True)
+            elif symbol == NUM_SUBTRACT:
+                self.update_volume(False)
+            elif symbol == O:
+                os.startfile(self.directory + "/" + self.selected_wav)
+            elif symbol == SPACE:
+                self.setup_selected_wav()
 
     def on_update(self, delta_time: float):
-        self.text_input.focus = True
         if self._last_text != self.text_input.value:
             self.update_search()
             if len(self._last_text) < len(self.text_input.value):
@@ -298,6 +319,9 @@ class RiderWindow(ExpWin):
         if not self.asked_folder and self.local_time > 1:
             self.ask_folder()
             self.get_wavs()
+
+        self.volume_color = self.volume_color.replace(a = int(ease_linear(127, 0, self.volume_shown, self.volume_shown + 1, self.local_time)))
+        self.volume_text.color = self.volume_color
 
         if self.player is None:
             return
@@ -323,8 +347,13 @@ class RiderWindow(ExpWin):
         self.ctx.scissor = self.ctx.screen.viewport  # Bug fix because I forgor to update default camera with scissor
         self.search_box.draw()
 
+        if self.text_input.focus:
+            arcade.draw_line(self.search_box.x, self.search_box.y - self.search_box.content_height, self.search_box.x - self.search_box.content_width, self.search_box.y - self.search_box.content_height, arcade.color.WHITE, 4)
+
         if self.show_sound:
             self.render_selected_wav()
+
+        self.volume_text.draw()
 
 
 def main(show_fps: bool = False):
