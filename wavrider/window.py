@@ -147,7 +147,7 @@ class RiderWindow(ExpWin):
         self.text_input.focus = y > self.height - 30
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        if scroll_y > 0:
+        if scroll_y < 0:
             if self.selected_index < len(self.wavs) - 1:
                 self.selected_index += 1
                 self.update_wav_text()
