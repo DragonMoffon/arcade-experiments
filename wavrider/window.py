@@ -294,6 +294,7 @@ class RiderWindow(ExpWin):
                 # self.play_sound("blip_a")
         elif symbol == DELETE:
             self.text_input.value = ""
+            self.text_input.focus = True
         elif symbol == ENTER:
             self.setup_selected_wav()
         if not self.text_input.focus:
