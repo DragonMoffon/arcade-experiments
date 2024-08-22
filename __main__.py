@@ -15,6 +15,7 @@ from wavrider.window import main as wav_main
 from pool.window import main as pool_main
 from perspective.window import main as perp_main
 from progress.window import main as prog_main
+from overlay.window import main as over_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -36,6 +37,7 @@ if __name__ == '__main__':
             "Sphere 3D": (sphere_main, (), {}),
             "Scale Visualizer 2D": (height2d_main, (), {}),
             "Scale Visualizer 3D": (height_main, (), {}),
-            "WavRider": (wav_main, (), {"show_fps": True})
+            "WavRider": (wav_main, (), {"show_fps": True}),
+            "Overlay": (over_main, (), {})
         }
     )
