@@ -14,6 +14,7 @@ from wavrider.window import main as wav_main
 # from notifications.window import main as notif_main
 from pool.window import main as pool_main
 from perspective.window import main as perp_main
+from progress.window import main as prog_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -24,6 +25,7 @@ if __name__ == '__main__':
         {
             "Pool Demo [TEMP LOCATION]": (pool_main, (), {"show_fps": True}),
             "Perp Demo": (perp_main, (), {}),
+            "Progressor Demo": (prog_main, (), {}),
             "DDA 2D": (dda2d_main, (), {}),
             "DDA 3D": (dda3d_main, (), {}),
             "Rect Demo": (rect_main, (), {}),
