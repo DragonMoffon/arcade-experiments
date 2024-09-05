@@ -7,5 +7,6 @@ in vec2 vs_uv;
 out vec4 fs_colour;
 
 void main(){
-    fs_colour = vec4(texture(display_texture, vs_uv).rgb, 1.0);
+    float gamma = 1.0;
+    fs_colour = vec4(pow(texture(display_texture, vs_uv).rgb, vec3(1.0/gamma)), 1.0);
 }
