@@ -12,7 +12,7 @@ in vec2 vs_uv;
 out vec4 fs_colour;
 
 float gaussian(vec2 src, vec2 pnt){
-    return signal.z * exp((pow(pnt.x-src.x, 2.0) + pow(pnt.y-src.y, 2.0)) / radius);
+    return signal.z * exp(-(pow(pnt.x-src.x, 2.0) + pow(pnt.y-src.y, 2.0)) / radius);
 }
 
 float light(vec2 src, vec2 pnt){

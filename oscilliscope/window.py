@@ -144,6 +144,7 @@ class OscWindow(Window):
 
     
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
+        return
         self.oscilliscope.pass_signal(2.0 * (x - self.center_x) / self.width, 2.0 * (y - self.center_y) / self.height, 5.0, 0.0)
         self.oscilliscope.process_signal()
     
@@ -159,7 +160,7 @@ class OscWindow(Window):
         sweep = (self.sec_dev * X_DEV_COUNT)
         x = 2.0 * (GLOBAL_CLOCK.time % sweep) / sweep - 1.0
         y = self.amplitude * sin(2 * pi * self.frequency * GLOBAL_CLOCK.time) / (self.volt_dev * Y_DEV_COUNT)
-        i = 1.0
+        i = 4.0
         d = GLOBAL_CLOCK.delta_time
         self.oscilliscope.pass_signal(x, y, i, d)
         self.oscilliscope.process_signal()
@@ -173,7 +174,6 @@ class OscWindow(Window):
         self.signal_label.draw()
 
 
-        
 def main():
     win = OscWindow()
     win.run()
