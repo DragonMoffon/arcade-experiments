@@ -36,7 +36,7 @@ class Oscilliscope:
 
         try:
             self._crt_program['radius'] = 0.0001
-            self._crt_program['decay'] = 15.0
+            self._crt_program['decay'] = 40.0
         except:
             pass
 
