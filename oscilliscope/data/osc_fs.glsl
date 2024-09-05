@@ -12,7 +12,8 @@ in vec2 vs_uv;
 out vec4 fs_colour;
 
 float gaussian(vec2 src, vec2 pnt){
-    return signal.z * exp(-(pow(pnt.x - src.x, 2.0) + pow(pnt.y - src.y, 2.0)) / radius);
+    vec2 diff = pnt - src;
+    return signal.z * radius / dot(diff, diff);
 }
 
 float signal_decay(float s){

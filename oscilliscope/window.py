@@ -159,7 +159,7 @@ class OscWindow(Window):
         sweep = (self.sec_dev * X_DEV_COUNT)
         x = 2.0 * (GLOBAL_CLOCK.time % sweep) / sweep - 1.0
         y = self.amplitude * sin(2 * pi * self.frequency * GLOBAL_CLOCK.time) / (self.volt_dev * Y_DEV_COUNT)
-        i = 10.0
+        i = 1.0
         d = GLOBAL_CLOCK.delta_time
         self.oscilliscope.pass_signal(x, y, i, d)
         self.oscilliscope.process_signal()
