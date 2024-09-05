@@ -7,6 +7,12 @@ in vec2 vs_uv;
 out vec4 fs_colour;
 
 void main(){
-    float gamma = 1.0;
-    fs_colour = vec4(pow(texture(display_texture, vs_uv).rgb, vec3(1.0/gamma)), 1.0);
+    float gamma = 2.2;
+    vec3 hdrcolour = texture(display_texture, vs_uv).rgb;
+
+    vec3 mappedcolour = hdrcolour / (hdrcolour + vec3(1.0));
+
+    vec3 gammacolour = pow(mappedcolour, vec3(1 / gamma));
+
+    fs_colour = vec4(gammacolour, 1.0);
 }
