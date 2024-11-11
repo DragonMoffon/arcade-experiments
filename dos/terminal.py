@@ -63,14 +63,9 @@ class Screen:
                 self.character_list.append(back)
                 self.character_list.append(char)
 
-        for x in range(self.char_count[0]):
-            for y in range(self.char_count[1]):
-                self[x, y] = randint(0, 255)
-                self[x, y] = arcade.types.Color.random()
-
         self.refresh_colour: arcade.types.Color = arcade.color.BLACK
 
-        self.source_texture: gl.Texture2D = ctx.texture(self.size)
+        self.source_texture: gl.Texture2D = ctx.texture(self.size, wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
 
         self.source_fbo: gl.Framebuffer = ctx.framebuffer(color_attachments=[self.source_texture])
 
@@ -107,3 +102,21 @@ class Screen:
     def draw(self):
         self.source_texture.use()
         self.output_geo.render(self.output_program)
+
+
+def draw_text(text: str, start_x: int, start_y: int, screen: Screen):
+    for idx, char in enumerate(text):
+        screen[start_x + idx, start_y] = ord(char)
+
+def colour_box(colour: arcade.types.Color, left: int, right: int, bottom: int, top: int, screen: Screen):
+    for x in range(left, right):
+        for y in range(bottom, top):
+            screen[x, y] = colour
+
+def colour_row(colour: arcade.types.Color, row: int, column_start: int, column_end: int, screen: Screen):
+    for idx in range(column_start, column_end):
+        screen[idx, row] = colour
+
+def colour_column(colour: arcade.types.Color, column: int, row_start: int, row_end: int, screen: Screen):
+    for idx in range(row_start, row_end):
+        screen[column, idx] = colour

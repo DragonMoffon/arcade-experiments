@@ -4,7 +4,7 @@ from arcade import Window, load_texture, Sprite, draw_sprite, Camera2D, Texture,
 import arcade.gl as gl
 import arcade
 
-from dos.terminal import Screen, CHAR_COUNT, CHAR_SIZE
+from dos.terminal import Screen, CHAR_COUNT, CHAR_SIZE, draw_text, colour_column, colour_row, colour_box
 
 import dos.data as data
 from common.data_loading import make_package_path_finder
@@ -18,47 +18,32 @@ class DOSWindow(Window):
     def __init__(self):
         super().__init__(1280, 720, "DOS")
         self.t_screen = Screen(CHAR_COUNT, CHAR_SIZE)
-        #self.terminal_texture = load_texture(get_image_path('starcom'), hash='terminal_input')
-        #self.terminal_output = Texture.create_empty('terminal_output', (self.terminal_texture.width, self.terminal_texture.height))
-        #self.terminal_camera = Camera2D(position=(0.0, 0.0))
 
-        #self.ctx.default_atlas.add(self.terminal_texture)
-        #self.ctx.default_atlas.add(self.terminal_output)
+        # background
+        colour_box(arcade.types.Color(0, 0, 168), 0, 80, 0, 30, self.t_screen)
+        colour_row(arcade.types.Color(0, 168, 168), 0, 0, 80, self.t_screen) # bottom row
+        colour_row(arcade.types.Color(0, 168, 168), -1, 0, 80, self.t_screen) # top row
 
-        #self.terminal_sprite = Sprite(self.terminal_output, scale=1.0)
-        #
-        #atlas_region = self.ctx.default_atlas.get_texture_region_info(self.terminal_texture.atlas_name)
+        # windows
+        colour_box(arcade.types.Color(84, 84, 252), 2, 76, 2, 7, self.t_screen)
+        colour_row(arcade.types.Color(168, 168, 168), 6, 2, 76, self.t_screen)
 
-        #self.terminal_program = self.ctx.load_program(
-        #    vertex_shader=get_shader_path('terminal_vs'),
-        #    fragment_shader=get_shader_path('terminal_fs')
-        #)
-        #self.terminal_program["atlas_texture"] = 0
-        #self.terminal_program["source_size"] = self.terminal_texture.width * 1.0, self.terminal_texture.height * 1.0
-        #coords = atlas_region.texture_coordinates
-        #self.terminal_program["source"] = coords[0], coords[1], (coords[-2] - coords[0]), (coords[-1] - coords[1])
+        colour_box(arcade.types.Color(84, 84, 252), 2, 54, 8, 28, self.t_screen)
+        colour_row(arcade.types.Color(168, 168, 168), 27, 2, 54, self.t_screen)
 
-        #self.terminal_geo = gl.geometry.quad_2d_fs()
+        colour_box(arcade.types.Color(84, 84, 252), 55, 76, 8, 28, self.t_screen)
+        colour_row(arcade.types.Color(168, 168, 168), 27, 55, 76, self.t_screen)
+
+        # text
+        draw_text('StarCom v1.4.00', 0, -1, self.t_screen)
+        draw_text('ID:T44  KEY:XXXXXX', 0, 0, self.t_screen)
 
     def on_draw(self):
         self.t_screen.render()
         self.t_screen.draw()
-        #self.clear()
-        #with self.ctx.default_atlas.render_into(self.terminal_output) as fbo:
-        #    fbo.clear()
-        #    self.ctx.default_atlas.texture.filter = self.ctx.LINEAR, self.ctx.LINEAR
-        #    self.ctx.default_atlas.texture.use(0)
-        #    self.ctx.default_atlas.use_uv_texture(1)
-        #    self.terminal_geo.render(self.terminal_program)
-    
-        #with self.terminal_camera.activate():
-        #    self.ctx.default_atlas.texture.filter = self.ctx.NEAREST, self.ctx.NEAREST
-        #    draw_sprite(self.terminal_sprite)
-        #    arcade.draw_text(f'adjustment: -{self.terminal_program['adjust']:.2f}', self.terminal_sprite.center_x, self.terminal_sprite.bottom, anchor_x='center', anchor_y='top')
 
     def on_update(self, delta_time: float):
         pass
-        #self.terminal_program['adjust'] = 0.05 + 0.05 * cos(0.25 * pi * self.time)
 
 
 def main():

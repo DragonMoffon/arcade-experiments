@@ -2,12 +2,11 @@
 
 const float hardScan = -16.0;
 const float hardPix = -2.0;
-const float radius = 1800; // Curvature (radius in px)
 const vec2 warp = vec2(1.0/32.0, 1.0/24.0);
 
 // Amount of shadow mask.
-const float maskDark=2.0;
-const float maskLight=4.0;
+const float maskDark=1.0;
+const float maskLight=1.0;
 
 //------------------------------------------------------------------------
 
