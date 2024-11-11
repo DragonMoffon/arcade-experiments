@@ -26,7 +26,6 @@ class CharSheet:
         self.sheet = arcade.load_spritesheet(get_image_path(name))
         self.chars = self.sheet.get_texture_grid(size, 16, 256)
         self.codes = {t: idx for idx, t in enumerate(self.chars)}
-        print(len(self.chars))
 
     def __getitem__(self, key: int) -> arcade.Texture:
         return self.chars[key]
@@ -84,6 +83,8 @@ class Screen:
         self.output_program["atlas_texture"] = 0
         self.output_program["adjust"] = 0.05
         self.output_program["source_size"] = self.size
+
+        self.source_camera = arcade.Camera2D(render_target=self.source_fbo)
         # self.output_program["source"] = 0.0, 0.0, 0.5, 0.5
 
 
@@ -99,8 +100,8 @@ class Screen:
         return char, back
 
     def render(self):
-        with self.source_fbo.activate() as fbo:
-            fbo.clear(color=self.refresh_colour)
+        with self.source_camera.activate():
+            self.source_fbo.clear(color=self.refresh_colour)
             self.character_list.draw(pixelated=True)
 
     def draw(self):
