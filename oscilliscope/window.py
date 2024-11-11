@@ -153,6 +153,8 @@ class OscWindow(Window):
         if symbol in SENSITIVITY_MAP:
             self.sensitivity = 1 / SENSITIVITY_MAP[symbol]
 
+        print(f'pressed: {symbol}, {GLOBAL_CLOCK.ticks}')
+
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         self.input_modifiers = modifiers
 
@@ -164,6 +166,7 @@ class OscWindow(Window):
         d = GLOBAL_CLOCK.delta_time
         self.oscilliscope.pass_signal(x, y, i, d)
         self.oscilliscope.process_signal()
+        print(f'update: {GLOBAL_CLOCK.ticks}')
 
     def on_draw(self):
         self.clear()
@@ -172,6 +175,7 @@ class OscWindow(Window):
         self.oscilliscope_label.draw()
         self.signal_label.text = f'Amplitude: {self.amplitude: .3f} - Frequency: {self.frequency: .3f}'
         self.signal_label.draw()
+        print(f'draw: {GLOBAL_CLOCK.ticks}')
 
 
 def main():
