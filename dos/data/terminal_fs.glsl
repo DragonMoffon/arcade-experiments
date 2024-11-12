@@ -1,12 +1,12 @@
 #version 330
 
-const float hardScan = -16.0;
+const float hardScan = -8.0;
 const float hardPix = -2.0;
 const vec2 warp = vec2(1.0/32.0, 1.0/24.0);
 
 // Amount of shadow mask.
 const float maskDark=1.0;
-const float maskLight=1.0;
+const float maskLight=1.5;
 
 //------------------------------------------------------------------------
 
@@ -41,12 +41,12 @@ vec2 Pos(vec2 uv){
 vec3 Fetch(vec2 pos, vec2 off){
     pos = floor(pos*source_size+off) / source_size;
     if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5)return vec3(0.0,0.0,0.0);
-    return ToLinear(texture(atlas_texture, Pos(pos.xy)).rgb);
+    return ToLinear(texture(atlas_texture, Pos(pos.xy),-16.0).rgb);
 }
 
 // Distance in emulated pixels to nearest texel.
 vec2 Dist(vec2 pos){
-    pos=pos*source_size;
+    pos = pos * source_size / 11.0;
     return -(fract(pos)-vec2(0.5));
 }
     
@@ -101,7 +101,7 @@ vec3 Tri(vec2 pos){
     float wa=Scan(pos,-1.0);
     float wb=Scan(pos, 0.0);
     float wc=Scan(pos, 1.0);
-    return a*wa+b*wb+c*wc;
+    return a*wa + b*wb + c*wc;
 }
 
 // Distortion of scanlines, and end of screen alpha.
@@ -114,7 +114,7 @@ vec2 Warp(vec2 pos){
 // Shadow mask.
 vec3 Mask(vec2 pos){
     pos.x += pos.y*3.0;
-    vec3 mask = vec3(maskDark, maskDark, maskDark);
+    vec3 mask = vec3(maskDark);
     pos.x = fract(pos.x/6.0);
     if (pos.x < 0.333) mask.r = maskLight;
     else if ( pos.x < 0.666) mask.g = maskLight;
