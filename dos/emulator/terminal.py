@@ -13,8 +13,12 @@ class Terminal:
     def __init__(self, position: tuple[int, int] = None, window: arcade.Window = None) -> None:
         self.window = window or arcade.get_window
 
-        self.screen = Screen(CHAR_COUNT, CHAR_SIZE, position if position is not None else window.center, window.ctx)
-        self.frame = Frame()
+        self.screen = Screen(CHAR_COUNT, CHAR_SIZE, (CHAR_COUNT[0]*CHAR_SIZE[0]//2, CHAR_COUNT[1]*CHAR_SIZE[1]//2), window.ctx)
+        self.frame = Frame(
+            FrameConfig(
+                self.screen.size, self.screen.size, position, (TextureConfig(),)
+            )
+        )
 
         self.char_sheet: CharSheet = None
 

@@ -1,15 +1,14 @@
 from math import cos, sin, pi
 
-from arcade import Window, load_texture, Sprite, draw_sprite, Camera2D, Texture, LBWH
+from arcade import Window
 from arcade.types import Color
-import arcade.gl as gl
 import arcade
 
 from dos.emulator import CHAR_COUNT, CHAR_SIZE
 from dos.emulator.screen import Screen
-from dos.emulator.sheet import MAP
-from dos.emulator.element import ElementBoundary, Window as WindowElement
-from dos.emulator.draw import colour_box, colour_row, draw_text
+from dos.emulator.element import  Window as WindowElement
+from dos.emulator.draw import colour_box, colour_row, draw_text, Boundary
+from dos.emulator.terminal import Terminal
 
 from random import choice, randint
 
@@ -20,29 +19,28 @@ class DOSWindow(Window):
 
     def __init__(self):
         super().__init__(1280, 720, "DOS")
-        self.t_screen = Screen(CHAR_COUNT, CHAR_SIZE, self.center, self.ctx)
+        self.terminal = Terminal(self.center, self)
 
         self.scene_camera = arcade.Camera2D()
 
         # background
-        colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.t_screen)
-        colour_row(Color(0, 168, 168), 0, 0, 80, self.t_screen) # bottom row
-        colour_row(Color(0, 168, 168), -1, 0, 80, self.t_screen) # top row
+        colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.terminal.screen)
+        colour_row(Color(0, 168, 168), 0, 0, 80, self.terminal.screen) # bottom row
+        colour_row(Color(0, 168, 168), -1, 0, 80, self.terminal.screen) # top row
 
         # windows
-        self.output = WindowElement('Output', (2, 2), (74, 5), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), ElementBoundary.DOUBLE, self.t_screen)
-        self.channel = WindowElement('Channel', (2, 8), (52, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), ElementBoundary.DOUBLE, self.t_screen)
-        self.signal = WindowElement('Signal', (55, 8), (21, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), ElementBoundary.DOUBLE, self.t_screen)
+        self.output = WindowElement('Output', (2, 2), (74, 5), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
+        self.channel = WindowElement('Channel', (2, 8), (52, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
+        self.signal = WindowElement('Signal', (55, 8), (21, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
 
         self.output.draw()
         self.channel.draw()
         self.signal.draw()
 
 
-
         # text
-        draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.t_screen)
-        draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.t_screen)
+        draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.terminal.screen)
+        draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.terminal.screen)
 
         self.h = 0
         self.v = 0
@@ -54,24 +52,27 @@ class DOSWindow(Window):
             for y in range(9, 27):
                 if randint(0, 255) < 160:
                     continue
-                self.t_screen[x, y] = randint(33, 255)
+                self.terminal.screen[x, y] = randint(33, 255)
 
         for x in range(56, 75):
             for y in range(9, 27):
                 if randint(0, 255) < 200:
                     continue
-                self.t_screen[x, y] = randint(33, 255)
+                self.terminal.screen[x, y] = randint(33, 255)
 
         for x in range(3, 75):
             for y in range(3, 6):
                 if randint(0, 255) < 30:
                     continue
-                self.t_screen[x, y] = randint(33, 255)
+                self.terminal.screen[x, y] = randint(33, 255)
+
+        # with self.scene_camera.activate():
+        #     self.t_screen.render()
+        #     self.t_screen.draw()
 
         with self.scene_camera.activate():
-            self.t_screen.render()
-            self.t_screen.draw()
-
+            self.terminal.draw()
+        
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:
             case arcade.key.D:

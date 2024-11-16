@@ -1,6 +1,4 @@
 # Dos Terminal Ui Elements (I'm OOPing your procedure!)
-from enum import Enum
-
 from arcade.types import Color
 
 from dos.emulator.draw import draw_box, draw_row, colour_box, colour_row, draw_text, Boundary
