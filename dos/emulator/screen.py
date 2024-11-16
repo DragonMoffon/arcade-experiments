@@ -62,7 +62,6 @@ class Screen:
         self.output_program["source_size"] = self.size
 
         self.source_camera = Camera2D(render_target=self.source_fbo)
-        self.output_camera = Camera2D(position=(0.0, 0.0))
         # self.output_program["source"] = 0.0, 0.0, 0.5, 0.5
 
 
@@ -89,9 +88,8 @@ class Screen:
             self.character_list.draw(pixelated=True)
 
     def draw(self):
-        with self.output_camera.activate():
-            self.source_texture.use()
-            self.output_geo.render(self.output_program)
+        self.source_texture.use()
+        self.output_geo.render(self.output_program)
 
     def set_char(self, loc: tuple[int, int], char: int = None, fore: Color = None, back: Color = None, sheet: CharSheet = None):
         sheet = sheet or self.default

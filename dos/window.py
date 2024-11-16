@@ -22,6 +22,8 @@ class DOSWindow(Window):
         super().__init__(1280, 720, "DOS")
         self.t_screen = Screen(CHAR_COUNT, CHAR_SIZE, self.center, self.ctx)
 
+        self.scene_camera = arcade.Camera2D()
+
         # background
         colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.t_screen)
         colour_row(Color(0, 168, 168), 0, 0, 80, self.t_screen) # bottom row
@@ -66,8 +68,9 @@ class DOSWindow(Window):
                     continue
                 self.t_screen[x, y] = randint(33, 255)
 
-        self.t_screen.render()
-        self.t_screen.draw()
+        with self.scene_camera.activate():
+            self.t_screen.render()
+            self.t_screen.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:
@@ -92,11 +95,11 @@ class DOSWindow(Window):
                 self.v += 1
 
     def on_update(self, delta_time: float) -> bool | None:
-        pos = self.t_screen.output_camera.position
-        self.t_screen.output_camera.position = pos[0] + delta_time * self.h * 100.0, pos[1] + delta_time * self.v * 100.0
+        pos = self.scene_camera.position
+        self.scene_camera.position = pos[0] + delta_time * self.h * 100.0, pos[1] + delta_time * self.v * 100.0
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int) -> bool | None:
-        self.t_screen.output_camera.zoom = max(0.1, min(10.0,self.t_screen.output_camera.zoom + scroll_y /10.0))
+        self.scene_camera.zoom = max(0.1, min(10.0,self.scene_camera.zoom + scroll_y /10.0))
 
 def main():
     win = DOSWindow()
