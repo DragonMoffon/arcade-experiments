@@ -2,6 +2,7 @@
 
 import arcade
 import pyglet
+import math
 
 from arcade.types import Point2, Color
 
@@ -41,6 +42,9 @@ def clamp(minVal, val, maxVal):
     """Clamp a `val` to be no lower than `minVal`, and no higher than `maxVal`."""
     return max(minVal, min(maxVal, val))
 
+def smerp(start: float, end: float, decay: float, dt: float) -> float:
+    """Lerp between a and b over time independant of fluctuations in dt. https://www.youtube.com/watch?v=LSNQuFEDOyQ"""
+    return end + (start - end) * math.exp(-decay * dt)
 
 def draw_cross(origin: Point2, size: float, color: Color = arcade.color.WHITE, thickness = 1.0):
     x, y = origin

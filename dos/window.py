@@ -7,9 +7,13 @@ import arcade
 
 from dos.emulator import CHAR_COUNT, CHAR_SIZE
 from dos.emulator.screen import Screen
+from dos.emulator.sheet import MAP
 from dos.emulator.element import ElementBoundary, Window as WindowElement
 from dos.emulator.draw import colour_box, colour_row, draw_text
 
+from random import choice, randint
+
+c = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
 
 
 class DOSWindow(Window):
@@ -32,6 +36,8 @@ class DOSWindow(Window):
         self.channel.draw()
         self.signal.draw()
 
+
+
         # text
         draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.t_screen)
         draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.t_screen)
@@ -41,6 +47,25 @@ class DOSWindow(Window):
 
     def on_draw(self):
         self.clear()
+
+        for x in range(3, 53):
+            for y in range(9, 27):
+                if randint(0, 255) < 160:
+                    continue
+                self.t_screen[x, y] = randint(33, 255)
+
+        for x in range(56, 75):
+            for y in range(9, 27):
+                if randint(0, 255) < 200:
+                    continue
+                self.t_screen[x, y] = randint(33, 255)
+
+        for x in range(3, 75):
+            for y in range(3, 6):
+                if randint(0, 255) < 30:
+                    continue
+                self.t_screen[x, y] = randint(33, 255)
+
         self.t_screen.render()
         self.t_screen.draw()
 

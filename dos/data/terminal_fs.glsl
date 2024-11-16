@@ -1,10 +1,24 @@
 #version 330
 
-const float hardScan = -8.0;
-const float hardPix = -2.0;
-const vec2 warp = vec2(1.0/32.0, 1.0/24.0);
+//
+// PUBLIC DOMAIN CRT STYLED SCAN-LINE SHADER
+//
+//   by Timothy Lottes
+//
+// This is more along the style of a really good CGA arcade monitor.
+// With RGB inputs instead of NTSC.
+//
+// It is an example of what I personally would want as a display option for pixel art games.
+// Please take and use, change, or whatever.
+//
+// Modified by DragonMoffon
+//
 
-// Amount of shadow mask.
+const float hardScan = -8.0;  // Scanline hardness
+const float hardPix = -2.0;  // hardness of scanlined pixels
+const vec2 warp = vec2(1.0/32.0, 1.0/24.0);  // Display warp, should technically be circluar, but due to how the masking works that looks wrong.
+
+// Amount of shadow mask to make the rgb pixel
 const float maskDark=1.0;
 const float maskLight=1.5;
 
@@ -20,20 +34,16 @@ out vec4 fs_colour;
 
 //------------------------------------------------------------------------
 
+
+// These methods may not be needed if using Linear textures and outputting in linear space for post-processing
+
 // sRGB to Linear.
-// Assuming using sRGB typed textures this should not be needed.
 float ToLinear1(float c){return(c<=0.04045)?c/12.92:pow((c+0.055)/1.055,2.4);}
 vec3 ToLinear(vec3 c){return vec3(ToLinear1(c.r),ToLinear1(c.g),ToLinear1(c.b));}
 
 // Linear to sRGB.
-// Assuing using sRGB typed textures this should not be needed.
 float ToSrgb1(float c){return(c<0.0031308?c*12.92:1.055*pow(c,0.41666)-0.055);}
 vec3 ToSrgb(vec3 c){return vec3(ToSrgb1(c.r),ToSrgb1(c.g),ToSrgb1(c.b));}
-
-
-vec2 Pos(vec2 uv){
-    return uv;
-}
 
 
 // Nearest emulated sample given floating point position and texel offset.
@@ -41,7 +51,7 @@ vec2 Pos(vec2 uv){
 vec3 Fetch(vec2 pos, vec2 off){
     pos = floor(pos*source_size+off) / source_size;
     if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5)return vec3(0.0,0.0,0.0);
-    return ToLinear(texture(atlas_texture, Pos(pos.xy),-16.0).rgb);
+    return ToLinear(texture(atlas_texture, pos.xy,-16.0).rgb);
 }
 
 // Distance in emulated pixels to nearest texel.
@@ -113,7 +123,7 @@ vec2 Warp(vec2 pos){
 
 // Shadow mask.
 vec3 Mask(vec2 pos){
-    pos.x += pos.y*3.0;
+    pos.x += ceil(pos.y)*3.0;
     vec3 mask = vec3(maskDark);
     pos.x = fract(pos.x/6.0);
     if (pos.x < 0.333) mask.r = maskLight;

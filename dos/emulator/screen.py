@@ -68,7 +68,7 @@ class Screen:
 
     def __setitem__(self, loc: tuple[int, int], value: Color | int | tuple[int, Color] | tuple[int, Color, Color]):
         if isinstance(value, int):
-            char = self.character_set[value]
+            char = value
             fore = None
             back = None
         elif isinstance(value, Color):
