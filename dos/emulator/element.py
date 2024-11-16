@@ -3,7 +3,7 @@ from enum import Enum
 
 from arcade.types import Color
 
-from dos.emulator.draw import draw_box, draw_row, colour_box, colour_row, draw_text
+from dos.emulator.draw import draw_box, draw_row, colour_box, colour_row, draw_text, Boundary
 from dos.emulator.screen import Screen
 from dos.emulator.sheet import CharSheet
 
@@ -15,11 +15,6 @@ class Element:
 
     def draw(self):
         pass
-
-class ElementBoundary(Enum):
-    NONE = 0
-    SINGLE = 1
-    DOUBLE = 2
 
 class Window(Element):
     """
@@ -37,7 +32,7 @@ class Window(Element):
             header: Color,
             body: Color,
             boundary: Color,
-            boundary_type: ElementBoundary,
+            boundary_type: Boundary,
             screen: Screen,
             sheet: CharSheet = None
         ) -> None:

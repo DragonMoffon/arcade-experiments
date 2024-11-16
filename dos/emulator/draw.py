@@ -1,6 +1,14 @@
+from enum import IntEnum
+
 from arcade.types import Color
 from dos.emulator.sheet import CharSheet, MAP
 from dos.emulator.screen import Screen
+
+
+class Boundary(IntEnum):
+    NONE = 0
+    SINGLE = 1
+    DOUBLE = 2
 
 
 def draw_text(text: str, colour: Color, start_x: int, start_y: int, screen: Screen, sheet: CharSheet = None):
