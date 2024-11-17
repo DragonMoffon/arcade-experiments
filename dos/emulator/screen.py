@@ -5,6 +5,7 @@ import arcade.gl as gl
 
 from dos import get_shader_path
 from dos.emulator.sheet import CharSheet, MAP
+from dos.processing.frame import Frame, FrameConfig, TextureConfig, CRT
 
 class CharSprite(Sprite):
 
@@ -47,22 +48,8 @@ class Screen:
 
         self.refresh_colour: Color = colours.BLACK
 
-        self.source_texture: gl.Texture2D = ctx.texture(self.size, wrap_x=ctx.CLAMP_TO_EDGE, wrap_y=ctx.CLAMP_TO_EDGE)
-
-        self.source_fbo: gl.Framebuffer = ctx.framebuffer(color_attachments=[self.source_texture])
-
-        self.output_geo = gl.geometry.quad_2d(self.size, pos)
-
-        self.output_program = self.ctx.load_program(
-            vertex_shader=get_shader_path('terminal_vs'),
-            fragment_shader=get_shader_path('terminal_fs')
-        )
-        self.output_program["atlas_texture"] = 0
-        self.output_program["adjust"] = 0.0
-        self.output_program["source_size"] = self.size
-
-        self.source_camera = Camera2D(render_target=self.source_fbo)
-        # self.output_program["source"] = 0.0, 0.0, 0.5, 0.5
+        self.frame = Frame(FrameConfig(self.size, self.size, pos, TextureConfig()))
+        self.frame.add_process(CRT(self.size, self.ctx))
 
 
     def __setitem__(self, loc: tuple[int, int], value: Color | int | tuple[int, Color] | tuple[int, Color, Color]):
@@ -82,14 +69,10 @@ class Screen:
     def __getitem__(self, loc: tuple[int, int]) -> tuple[int, Color]:
         return self.get_char(loc)
 
-    def render(self):
-        with self.source_camera.activate():
-            self.source_fbo.clear(color=self.refresh_colour)
-            self.character_list.draw(pixelated=True)
-
     def draw(self):
-        self.source_texture.use()
-        self.output_geo.render(self.output_program)
+        with self.frame as fbo:
+            fbo.clear(colour=self.refresh_colour)
+            self.character_list.draw(pixelated=True)
 
     def set_char(self, loc: tuple[int, int], char: int = None, fore: Color = None, back: Color = None, sheet: CharSheet = None):
         sheet = sheet or self.default

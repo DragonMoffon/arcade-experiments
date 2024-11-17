@@ -9,6 +9,7 @@ from dos.emulator.screen import Screen
 from dos.emulator.element import  Window as WindowElement
 from dos.emulator.draw import colour_box, colour_row, draw_text, Boundary
 from dos.emulator.terminal import Terminal
+from dos.processing.frame import Frame, FrameConfig, TextureConfig, Bloom, TonemapAGX
 
 from random import choice, randint
 
@@ -20,6 +21,9 @@ class DOSWindow(Window):
     def __init__(self):
         super().__init__(1280, 720, "DOS")
         self.terminal = Terminal(self.center, self)
+        self.frame = Frame(FrameConfig(self.size, self.size, self.center, TextureConfig()), self.ctx)
+        # self.frame.add_process(Bloom(self.size, 5, self.ctx))
+        # self.frame.add_process(TonemapAGX(self.ctx))
 
         self.scene_camera = arcade.Camera2D()
 
@@ -46,7 +50,7 @@ class DOSWindow(Window):
         self.v = 0
 
     def on_draw(self):
-        self.clear()
+        self.clear(color=(120, 120, 120, 120))
 
         for x in range(3, 53):
             for y in range(9, 27):
@@ -66,12 +70,10 @@ class DOSWindow(Window):
                     continue
                 self.terminal.screen[x, y] = randint(33, 255)
 
-        # with self.scene_camera.activate():
-        #     self.t_screen.render()
-        #     self.t_screen.draw()
-
-        with self.scene_camera.activate():
-            self.terminal.draw()
+        with self.frame as fbo:
+            fbo.clear(colour=(120, 120, 120))
+            with self.scene_camera.activate():
+                self.terminal.draw()
         
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:

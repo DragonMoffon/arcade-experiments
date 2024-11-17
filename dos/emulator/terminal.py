@@ -4,7 +4,7 @@ from arcade.types import Color
 from dos.emulator import CHAR_COUNT, CHAR_SIZE
 from dos.emulator.screen import Screen
 from dos.emulator.sheet import CharSheet, MAP, IMAP
-from dos.processing.frame import Frame, FrameConfig, TextureConfig
+from dos.processing.frame import Frame, FrameConfig, TextureConfig, CRT, Bloom
 from dos.emulator.draw import Boundary
 
 
@@ -13,23 +13,15 @@ class Terminal:
     def __init__(self, position: tuple[int, int] = None, window: arcade.Window = None) -> None:
         self.window = window or arcade.get_window
 
-        self.screen = Screen(CHAR_COUNT, CHAR_SIZE, (CHAR_COUNT[0]*CHAR_SIZE[0]//2, CHAR_COUNT[1]*CHAR_SIZE[1]//2), window.ctx)
-        self.frame = Frame(
-            FrameConfig(
-                self.screen.size, self.screen.size, position, (TextureConfig(),)
-            )
-        )
+        self.screen = Screen(CHAR_COUNT, CHAR_SIZE, position, window.ctx)
 
         self.char_sheet: CharSheet = None
 
     # TERMINAL COMMANDS -----------------------
     def draw(self):
-        with self.frame:
-            self.screen.render()
-            self.screen.draw()
+        self.screen.draw()
 
     # DRAW COMMANDS ----------------------------
-
     def draw_char(self, x, y, char: str = None, fore: Color = None, back: Color = None):
         self.screen.set_char((x, y), char, fore, back, self.char_sheet)
 
