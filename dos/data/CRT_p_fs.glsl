@@ -47,10 +47,10 @@ vec3 ToSrgb(vec3 c){return vec3(ToSrgb1(c.r),ToSrgb1(c.g),ToSrgb1(c.b));}
 
 // Nearest emulated sample given floating point position and texel offset.
 // Also zero's off screen.
-vec3 Fetch(vec2 pos, vec2 off){
+vec4 Fetch(vec2 pos, vec2 off){
     pos = floor(pos*source_size+off) / source_size;
-    if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5) return vec3(0.0);
-    return ToLinear(texture(source_texture, pos.xy).rgb);
+    if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5) return vec4(0.0);
+    return vec4(ToLinear(texture(source_texture, pos.xy).rgb), 1.0);
 }
 
 // Distance in emulated pixels to nearest texel.
@@ -65,10 +65,10 @@ float Gaus(float pos,float scale){
 }
 
 // 3-tap Gaussian filter along horz line.
-vec3 Horz3(vec2 pos,float off){
-    vec3 b=Fetch(pos,vec2(-1.0,off));
-    vec3 c=Fetch(pos,vec2( 0.0,off));
-    vec3 d=Fetch(pos,vec2( 1.0,off));
+vec4 Horz3(vec2 pos,float off){
+    vec4 b=Fetch(pos,vec2(-1.0,off));
+    vec4 c=Fetch(pos,vec2( 0.0,off));
+    vec4 d=Fetch(pos,vec2( 1.0,off));
     float dst=Dist(pos).x;
     // Convert distance to weight.
     float wb=Gaus(dst-1.0,hardPix);
@@ -79,12 +79,12 @@ vec3 Horz3(vec2 pos,float off){
 }
 
 // 5-tap Gaussian filter along horz line.
-vec3 Horz5(vec2 pos,float off){
-    vec3 a=Fetch(pos,vec2(-2.0,off));
-    vec3 b=Fetch(pos,vec2(-1.0,off));
-    vec3 c=Fetch(pos,vec2( 0.0,off));
-    vec3 d=Fetch(pos,vec2( 1.0,off));
-    vec3 e=Fetch(pos,vec2( 2.0,off));
+vec4 Horz5(vec2 pos,float off){
+    vec4 a=Fetch(pos,vec2(-2.0,off));
+    vec4 b=Fetch(pos,vec2(-1.0,off));
+    vec4 c=Fetch(pos,vec2( 0.0,off));
+    vec4 d=Fetch(pos,vec2( 1.0,off));
+    vec4 e=Fetch(pos,vec2( 2.0,off));
     float dst=Dist(pos).x;
     // Convert distance to weight.
     float wa=Gaus(dst-2.0,hardPix);
@@ -103,14 +103,14 @@ float Scan(vec2 pos,float off){
 }
 
 // Allow nearest three lines to effect pixel.
-vec3 Tri(vec2 pos){
-    vec3 a=Horz3(pos,-1.0);
-    vec3 b=Horz5(pos, 0.0);
-    vec3 c=Horz3(pos, 1.0);
+vec4 Tri(vec2 pos){
+    vec4 a=Horz3(pos,-1.0);
+    vec4 b=Horz5(pos, 0.0);
+    vec4 c=Horz3(pos, 1.0);
     float wa=Scan(pos,-1.0);
     float wb=Scan(pos, 0.0);
     float wc=Scan(pos, 1.0);
-    return a*wa + b*wb + c*wc;
+    return vec4(a.rgb*wa + b.rgb*wb + c.rgb*wc, (a.a*wa + b.a*wb + c.a*wc) / (wa+wb+wc));
 }
 
 // Distortion of scanlines, and end of screen alpha.
@@ -121,9 +121,9 @@ vec2 Warp(vec2 pos){
 }
 
 // Shadow mask.
-vec3 Mask(vec2 pos){
+vec4 Mask(vec2 pos){
     pos.x += ceil(pos.y)*3.0;
-    vec3 mask = vec3(maskDark);
+    vec4 mask = vec4(vec3(maskDark), 1.0);
     pos.x = fract(pos.x/6.0);
     if (pos.x < 0.333) mask.r = maskLight;
     else if ( pos.x < 0.666) mask.g = maskLight;
@@ -133,6 +133,6 @@ vec3 Mask(vec2 pos){
 
 void main(){
     vec2 pos = Warp(vs_uv);
-    fs_colour = vec4(Tri(pos) * Mask(vs_uv * source_size), 1.0);
+    fs_colour = Tri(pos) * Mask(vs_uv * source_size);
     fs_colour.rgb = ToSrgb(fs_colour.rgb);
 }

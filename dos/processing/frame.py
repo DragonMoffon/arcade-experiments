@@ -50,8 +50,8 @@ class CRT(Process):
         self.program['source_size'] = size
 
     def __call__(self, source: gl.Texture2D) -> Any:
-       source.use()
-       self.geo.render(self.program)
+        source.use()
+        self.geo.render(self.program)
 
 
 class Bloom(Process):
@@ -140,7 +140,7 @@ class TonemapAGX(Process):
         self.program['saturation'] = 1.0
 
     def __call__(self, source: gl.Texture2D) -> Any:
-        source.use();
+        source.use()
         self.geo.render(self.program)
 
 
@@ -237,5 +237,10 @@ class Frame:
             self.ctx.viewport = self._previous_viewport
         self._previous_viewport = self._previous_camera = self._previous_fbo = None
 
-        self.process_texture_a.use()
-        self.render_geo.render(self.render_prog)
+        
+        func = self.ctx.blend_func
+        self.ctx.blend_func = self.ctx.BLEND_DEFAULT
+        with self.ctx.enabled(self.ctx.BLEND):
+            self.process_texture_a.use()
+            self.render_geo.render(self.render_prog)
+        self.ctx.blend_func = func
