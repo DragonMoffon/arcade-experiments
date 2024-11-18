@@ -40,7 +40,7 @@ class Screen:
             for y in range(self.char_count[1]):
                 y_pos = hh + y * size[1]
                 char = CharSprite(start_char, self.default, center_x=x_pos, center_y=y_pos)
-                back = SpriteSolidColor(size[0], size[1], x_pos, y_pos, colours.TRANSPARENT_BLACK)
+                back = SpriteSolidColor(size[0], size[1], x_pos, y_pos, colours.BLACK)
                 cc.append(char)
                 cb.append(back)
                 self.character_list.append(back)
@@ -90,3 +90,18 @@ class Screen:
         character = self._character_grid[loc[0]][loc[1]]
         background = self._backing_grid[loc[0]][loc[1]]
         return character.char, character.color, background.color
+    
+    def clear(self, l: int = 0, b: int = 0, w: int = 0, h: int = 0):
+        w = w or self.char_count[0]
+        h = h or self.char_count[1]
+        start_char = MAP[' ']
+        for x in range(l, l+w):
+            for y in range(b, b+h):
+                char = self._character_grid[x][y]
+                back = self._backing_grid[x][y]
+
+                char.color = colours.WHITE
+                char.char = start_char
+                char.texture = self.default[start_char]
+                
+                back.color = colours.BLACK

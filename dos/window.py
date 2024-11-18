@@ -11,8 +11,9 @@ from dos.emulator.draw import colour_box, colour_row, draw_text, Boundary
 from dos.emulator.terminal import Terminal
 from dos.processing.frame import Frame, FrameConfig, TextureConfig, Bloom, TonemapAGX
 
-from random import choice, randint
+from dos.game.snake import SnakeApp
 
+from random import choice, randint
 c = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
 
 
@@ -25,56 +26,47 @@ class DOSWindow(Window):
         # self.frame.add_process(Bloom(self.size, 5, self.ctx))
         # self.frame.add_process(TonemapAGX(self.ctx))
 
+        self.snake = SnakeApp(self.terminal)
+        self.terminal.launch(self.snake)
+
         self.scene_camera = arcade.Camera2D()
 
-        # background
-        colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.terminal.screen)
-        colour_row(Color(0, 168, 168), 0, 0, 80, self.terminal.screen) # bottom row
-        colour_row(Color(0, 168, 168), -1, 0, 80, self.terminal.screen) # top row
+        ## background
+        #colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.terminal.screen)
+        #colour_row(Color(0, 168, 168), 0, 0, 80, self.terminal.screen) # bottom row
+        #colour_row(Color(0, 168, 168), -1, 0, 80, self.terminal.screen) # top row
 
-        # windows
-        self.output = WindowElement('Output', (2, 2), (74, 5), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
-        self.channel = WindowElement('Channel', (2, 8), (52, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
-        self.signal = WindowElement('Signal', (55, 8), (21, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
+        ## windows
+        #self.output = WindowElement('Output', (2, 2), (74, 5), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
+        #self.channel = WindowElement('Channel', (2, 8), (52, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
+        #self.signal = WindowElement('Signal', (55, 8), (21, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
 
-        self.output.draw()
-        self.channel.draw()
-        self.signal.draw()
+        #self.output.draw()
+        #self.channel.draw()
+        #self.signal.draw()
 
 
         # text
-        draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.terminal.screen)
-        draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.terminal.screen)
+        # draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.terminal.screen)
+        # draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.terminal.screen)
 
         self.h = 0
         self.v = 0
 
     def on_draw(self):
-        self.clear(color=(120, 120, 120, 120))
-
-        for x in range(3, 53):
-            for y in range(9, 27):
-                if randint(0, 255) < 160:
-                    continue
-                self.terminal.screen[x, y] = randint(33, 255)
-
-        for x in range(56, 75):
-            for y in range(9, 27):
-                if randint(0, 255) < 200:
-                    continue
-                self.terminal.screen[x, y] = randint(33, 255)
-
-        for x in range(3, 75):
-            for y in range(3, 6):
-                if randint(0, 255) < 30:
-                    continue
-                self.terminal.screen[x, y] = randint(33, 255)
+        self.clear()
 
         with self.frame as fbo:
-            fbo.clear(colour=(120, 120, 120))
+            fbo.clear()
             with self.scene_camera.activate():
                 self.terminal.draw()
         
+    def on_update(self, delta_time: float) -> bool | None:
+        pos = self.scene_camera.position
+        self.scene_camera.position = pos[0] + delta_time * self.h * 100.0, pos[1] + delta_time * self.v * 100.0
+
+        self.terminal.update(delta_time)
+
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:
             case arcade.key.D:
@@ -85,6 +77,7 @@ class DOSWindow(Window):
                 self.v += 1
             case arcade.key.S:
                 self.v -= 1
+        self.terminal.input(symbol, modifiers, True)
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool | None:
         match symbol:
@@ -96,10 +89,8 @@ class DOSWindow(Window):
                 self.v -= 1
             case arcade.key.S:
                 self.v += 1
+        self.terminal.input(symbol, modifiers, False)
 
-    def on_update(self, delta_time: float) -> bool | None:
-        pos = self.scene_camera.position
-        self.scene_camera.position = pos[0] + delta_time * self.h * 100.0, pos[1] + delta_time * self.v * 100.0
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int) -> bool | None:
         self.scene_camera.zoom = max(0.1, min(10.0,self.scene_camera.zoom + scroll_y /10.0))

@@ -1,3 +1,6 @@
+from functools import partial
+from typing import Callable
+
 import arcade
 from arcade.types import Color
 
@@ -6,7 +9,11 @@ from dos.emulator.screen import Screen
 from dos.emulator.sheet import CharSheet, MAP, IMAP
 from dos.processing.frame import Frame, FrameConfig, TextureConfig, CRT, Bloom
 from dos.emulator.draw import Boundary
+from dos.emulator.app import App
 
+
+TPS = 20 # Ticks per second
+TR = 1.0 / TPS # Tick Rate
 
 class Terminal:
     
@@ -17,12 +24,63 @@ class Terminal:
 
         self.char_sheet: CharSheet = None
 
+        self.clear_commands: list[Callable] = []
+
+        self.awake_app: App = None
+        self.asleep_apps: list[App] = []
+
+        self.terminal_time = 0.0
+        self.tick_time = 0.0
+        self.current_tick: int = 0
+
     # TERMINAL COMMANDS -----------------------
     def draw(self):
         self.screen.draw()
 
+    def update(self, dt: float):
+        self.tick_time += dt
+        while self.tick_time > TR:
+            self.tick_time -= TR
+            self.terminal_time += TR
+            self.current_tick += 1
+            self.tick(self.current_tick)
+
+    def tick(self, t: int):
+        if self.awake_app:
+            self.awake_app.run(t)
+        for app in self.asleep_apps:
+            app.sleep(t)
+
+    def input(self, input: int, modifiers: int, pressed: bool):
+        if self.awake_app:
+            self.awake_app.input(input, modifiers, pressed)
+
+    # OS COMMANDS -----------------------------
+    def launch(self, app: App, **options):
+        if app.terminal != self:
+            raise ValueError('App is not synced to this terminal')
+        if self.awake_app:
+            self.asleep_apps.append(self.awake_app)
+            self.awake_app.close(self.current_tick)
+        app.launch(self.current_tick, **options)
+        self.awake_app = app
+            
+            
     # DRAW COMMANDS ----------------------------
+    def clear(self):
+        self.screen.clear()
+        for command in self.clear_commands:
+            command()
+
+    def add_clear_command(self, cmd: Callable, *args, **kwds):
+        self.clear_commands.append(partial(cmd, *args, **kwds))
+
+    def reset_clear_commands(self):
+        self.clear_commands = []
+
     def draw_char(self, x, y, char: str = None, fore: Color = None, back: Color = None):
+        if char is not None:
+            char = MAP[char]
         self.screen.set_char((x, y), char, fore, back, self.char_sheet)
 
     def draw_text(self, start_x: int, start_y: int, text: str = None, fore: Color = None, back: Color = None):
