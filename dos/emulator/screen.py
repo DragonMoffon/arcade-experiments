@@ -1,11 +1,12 @@
 from typing import Any
-from arcade import ArcadeContext, SpriteList, Sprite, Texture, SpriteSolidColor, Camera2D, color as colours
+from arcade import ArcadeContext, SpriteList, Sprite, Texture, SpriteSolidColor, Camera2D, XYWH, LBWH, color as colours
 from arcade.types import Color
 import arcade.gl as gl
 
 from dos import get_shader_path
 from dos.emulator.sheet import CharSheet, MAP
 from dos.processing.frame import Frame, FrameConfig, TextureConfig, CRT
+
 
 class CharSprite(Sprite):
 
@@ -48,9 +49,9 @@ class Screen:
 
         self.refresh_colour: Color = colours.BLACK
 
-        self.frame = Frame(FrameConfig(self.size, self.size, pos, TextureConfig()))
+        self.frame_camera = Camera2D(viewport=LBWH(0, 0, self.size[0],self.size[1]), position=(0, 0), projection=LBWH(0.0, 0.0, self.size[0], self.size[1]))
+        self.frame = Frame(FrameConfig((self.size[0],self.size[1]), self.size, pos, TextureConfig()))
         self.frame.add_process(CRT(self.size, self.ctx))
-
 
     def __setitem__(self, loc: tuple[int, int], value: Color | int | tuple[int, Color] | tuple[int, Color, Color]):
         if isinstance(value, int):
@@ -72,7 +73,8 @@ class Screen:
     def draw(self):
         with self.frame as fbo:
             fbo.clear(colour=self.refresh_colour)
-            self.character_list.draw(pixelated=True)
+            with self.frame_camera.activate():
+                self.character_list.draw(pixelated=True)
 
     def set_char(self, loc: tuple[int, int], char: int = None, fore: Color = None, back: Color = None, sheet: CharSheet = None):
         sheet = sheet or self.default

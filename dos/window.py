@@ -12,6 +12,7 @@ from dos.emulator.terminal import Terminal
 from dos.processing.frame import Frame, FrameConfig, TextureConfig, Bloom, TonemapAGX
 
 from dos.game.snake import SnakeApp
+from dos.game.starcomm import StarCommApp
 
 from random import choice, randint
 c = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
@@ -28,27 +29,14 @@ class DOSWindow(Window):
 
         self.snake = SnakeApp(self.terminal)
         self.terminal.launch(self.snake)
+        self.starcomm = StarCommApp(self.terminal)
+        # self.terminal.launch(self.starcomm)
 
         self.scene_camera = arcade.Camera2D()
 
-        ## background
-        #colour_box(Color(0, 0, 168), 0, 80, 0, 30, self.terminal.screen)
-        #colour_row(Color(0, 168, 168), 0, 0, 80, self.terminal.screen) # bottom row
-        #colour_row(Color(0, 168, 168), -1, 0, 80, self.terminal.screen) # top row
-
-        ## windows
-        #self.output = WindowElement('Output', (2, 2), (74, 5), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
-        #self.channel = WindowElement('Channel', (2, 8), (52, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
-        #self.signal = WindowElement('Signal', (55, 8), (21, 20), Color(168, 168, 168), Color(84, 84, 252), Color(255, 255, 255), Boundary.DOUBLE, self.terminal.screen)
-
-        #self.output.draw()
-        #self.channel.draw()
-        #self.signal.draw()
 
 
         # text
-        # draw_text('StarCom v1.4.00', arcade.color.BLACK, 0, -1, self.terminal.screen)
-        # draw_text('ID:T44  KEY:XXXXXX', arcade.color.BLACK, 0, 0, self.terminal.screen)
 
         self.h = 0
         self.v = 0

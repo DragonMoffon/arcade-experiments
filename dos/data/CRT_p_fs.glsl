@@ -15,7 +15,7 @@
 //
 
 const float hardScan = -8.0;  // Scanline hardness
-const float hardPix = -2.0;  // hardness of scanlined pixels
+const float hardPix = -6.0;  // hardness of scanlined pixels
 const vec2 warp = vec2(1.0/32.0, 1.0/24.0);  // Display warp, should technically be circluar, but due to how the masking works that looks wrong.
 
 // Amount of shadow mask to make the rgb pixel

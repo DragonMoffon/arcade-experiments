@@ -38,7 +38,7 @@ class App:
     # OVERRIDE EVENTS ---------
 
     def on_launch(self, tick: int, **options):
-        pass
+        self.open(tick)
 
     def on_kill(self, tick: int):
         pass

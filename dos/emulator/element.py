@@ -2,13 +2,13 @@
 from arcade.types import Color
 
 from dos.emulator.draw import draw_box, draw_row, colour_box, colour_row, draw_text, Boundary
-from dos.emulator.screen import Screen
+from dos.emulator.terminal import Terminal
 from dos.emulator.sheet import CharSheet
 
 class Element:
 
-    def __init__(self, screen: Screen, sheet: CharSheet = None) -> None:
-        self.screen = screen
+    def __init__(self, terminal: Terminal, sheet: CharSheet = None) -> None:
+        self.terminal = terminal
         self.sheet = sheet
 
     def draw(self):
@@ -31,10 +31,10 @@ class Window(Element):
             body: Color,
             boundary: Color,
             boundary_type: Boundary,
-            screen: Screen,
+            terminal: Terminal,
             sheet: CharSheet = None
         ) -> None:
-        super().__init__(screen, sheet)
+        super().__init__(terminal, sheet)
         self.name = name
         self.start = start
         self.size = size
@@ -45,11 +45,9 @@ class Window(Element):
         self.header = header
         self.body = body
         self.boundary = boundary
-
-        self.boundary_type = boundary
+        self.boundary_type = boundary_type
 
     def draw(self):
-        colour_box(self.body, self.l, self.r, self.b, self.t, self.screen)
-        colour_row(self.header, self.t-1, self.l, self.r, self.screen)
-        draw_box(self.boundary, self.l, self.r, self.b, self.t, self.screen)
-        draw_text(self.name, self.boundary, self.l + 1, self.t - 1, self.screen)
+        self.terminal.draw_box(self.l, self.b, self.w, self.h, self.boundary_type, fore=self.boundary, back=self.body)
+        self.terminal.draw_row(self.t-1, self.l, self.r, back=self.header)
+        self.terminal.draw_text(self.l + 1, self.t - 1, self.name, self.boundary)

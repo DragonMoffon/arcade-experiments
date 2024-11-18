@@ -101,7 +101,7 @@ class Terminal:
                 case Boundary.DOUBLE:
                     bounds = (0xC8, 0xBC, 0xC9, 0xBB, 0xBA, 0xCD) # bl, br, tl, tr, v, h
                 case _:
-                    bounds = (None, None, None, None, None) # bl, br, tl, tr, v, h
+                    bounds = (None, None, None, None, None, None) # bl, br, tl, tr, v, h
 
             s = self.screen
             c = self.char_sheet
@@ -120,8 +120,8 @@ class Terminal:
                 s.set_char((x, t-1), bounds[5], fore, back, c)
 
         if is_filled:
-            for x in range(l+2, r-1):
-                for y in range(b+2, t-1):
+            for x in range(l+1, r-1):
+                for y in range(b+1, t-1):
                     s.set_char((x, y), None, None, back)
 
     def draw_row(self, row: int, start: int = 0, stop: int = None, step: int = 1, char: str = None, fore: Color = None, back: Color = None):
