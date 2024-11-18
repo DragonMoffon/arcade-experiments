@@ -17,6 +17,7 @@ from perspective.window import main as perp_main
 from progress.window import main as prog_main
 from overlay.window import main as over_main
 from oscilliscope.window import main as osc_main
+from dos.window import main as dos_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -25,6 +26,7 @@ if __name__ == '__main__':
     load_shared_font("gohu")
     main(
         {   
+            "DOS Terminal": (dos_main, (), {}),
             "Oscilliscope": (osc_main, (), {}),
             "Pool Demo [TEMP LOCATION]": (pool_main, (), {"show_fps": True}),
             "Perp Demo": (perp_main, (), {}),
