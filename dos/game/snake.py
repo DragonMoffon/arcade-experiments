@@ -21,6 +21,8 @@ class SnakeApp(App):
         self.snake_next: int = 0
         self.snake_size: int = 5
         self.food_count: int = 1
+
+        self.move_timer: int = 0
     
     def on_launch(self, tick: int, **options):
         self.launch_tick = tick
@@ -30,12 +32,16 @@ class SnakeApp(App):
         self.last_open_tick = tick
         self.terminal.reset_clear_commands()
         self.terminal.add_clear_command(self.terminal.draw_row, -1, back=(255, 255, 255))
-        self.terminal.add_clear_command(self.terminal.draw_text, 1, -1, 'SNAKE V0.2', fore=(0, 0, 0))
+        self.terminal.add_clear_command(self.terminal.draw_text, 1, -1, 'SNAKE V0.3', fore=(0, 0, 0))
         self.terminal.clear()
         self.reset()
 
     def on_run(self, tick: int):
-        self.draw()
+        self.move_timer += 1
+        if self.move_timer < 2:
+            return
+        self.move_timer = 0
+
         head = self.snake_body[0]
         self.snake_direction = self.snake_next
         match self.snake_direction:
@@ -66,6 +72,8 @@ class SnakeApp(App):
             if food in self.snake_body:
                 continue
             self.food.add(food)
+
+        self.draw()
 
     def on_input(self, input: int, modifiers: int, pressed: bool):
         if pressed:
