@@ -23,7 +23,7 @@ class Screen:
         self.char_count = count
         self.char_size = size
         self.size = (size[0] * count[0]), (size[1] * count[1]) # Pixel size of screen
-        self.default = CharSheet('sheet_ascii_demo', size)
+        self.default = CharSheet('MxPlus_IBM_CGA-2y', size)
 
         # for x, y 
         self.character_list = SpriteList(capacity=2 * count[0] * count[1])
@@ -50,7 +50,14 @@ class Screen:
         self.refresh_colour: Color = colours.BLACK
 
         self.frame_camera = Camera2D(viewport=LBWH(0, 0, self.size[0],self.size[1]), position=(0, 0), projection=LBWH(0.0, 0.0, self.size[0], self.size[1]))
-        self.frame = Frame(FrameConfig((self.size[0],self.size[1]), self.size, pos, TextureConfig()))
+        self.frame = Frame(
+            FrameConfig((self.size[0],self.size[1]), self.size, pos, TextureConfig()),
+            ctx,
+            ctx.load_program(
+                vertex_shader=get_shader_path('frame_render_vs'),
+                fragment_shader=get_shader_path('CRT_r_fs')
+            )
+        )
         self.frame.add_process(CRT(self.size, self.ctx))
 
     def __setitem__(self, loc: tuple[int, int], value: Color | int | tuple[int, Color] | tuple[int, Color, Color]):

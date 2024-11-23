@@ -147,7 +147,7 @@ class TonemapAGX(Process):
 # Upstream
 class Frame:
 
-    def __init__(self, config: FrameConfig, ctx: arcade.ArcadeContext = None) -> None:
+    def __init__(self, config: FrameConfig, ctx: arcade.ArcadeContext = None, render: gl.Program = None) -> None:
         ctx = ctx or arcade.get_window().ctx
         self.config = config
         
@@ -173,7 +173,7 @@ class Frame:
             mode=ctx.TRIANGLE_STRIP,
         )
         self.set_location(config.pos, config.output_size)
-        self.render_prog = ctx.load_program(
+        self.render_prog = render or ctx.load_program(
             vertex_shader=get_shader_path('frame_render_vs'),
             fragment_shader=get_shader_path('frame_render_fs')
         )

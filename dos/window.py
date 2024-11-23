@@ -13,6 +13,7 @@ from dos.processing.frame import Frame, FrameConfig, TextureConfig, Bloom, Tonem
 
 from dos.game.snake import SnakeApp
 from dos.game.starcomm import StarCommApp
+from dos.game.tictactoe import SuperTicTacToeApp
 
 from random import choice, randint
 c = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
@@ -28,13 +29,12 @@ class DOSWindow(Window):
         # self.frame.add_process(TonemapAGX(self.ctx))
 
         self.snake = SnakeApp(self.terminal)
-        self.terminal.launch(self.snake)
+        # self.terminal.launch(self.snake)
         self.starcomm = StarCommApp(self.terminal)
-        # self.terminal.launch(self.starcomm)
-
+        self.terminal.launch(self.starcomm)
+        self.tictactoe = SuperTicTacToeApp(self.terminal)
+        # self.terminal.launch(self.tictactoe)
         self.scene_camera = arcade.Camera2D()
-
-
 
         # text
 
@@ -42,7 +42,7 @@ class DOSWindow(Window):
         self.v = 0
 
     def on_draw(self):
-        self.clear()
+        self.clear((15, 15, 15))
 
         with self.frame as fbo:
             fbo.clear()

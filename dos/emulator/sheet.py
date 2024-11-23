@@ -41,6 +41,7 @@ R'PQRSTUVWXYZ[\]^_'
 MAP = {
     c: b for c, b in zip(encoding_str, encoding_str.encode('cp437'))
 }
+MAP['ÿ'] = 0x98
 IMAP = {
     b: c for c,b in MAP.items()
 }

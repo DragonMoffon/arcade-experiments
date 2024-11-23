@@ -21,6 +21,7 @@ class Terminal:
         self.window = window or arcade.get_window
 
         self.screen = Screen(CHAR_COUNT, CHAR_SIZE, position, window.ctx)
+        self.saved_clear_grid = [[]] # TODO
 
         self.char_sheet: CharSheet = None
 
@@ -86,9 +87,18 @@ class Terminal:
     def draw_text(self, start_x: int, start_y: int, text: str = None, fore: Color = None, back: Color = None):
         s = self.screen
         c = self.char_sheet
+        line_shift = 0
+        idx_shift = 0
         for idx, char in enumerate(text):
-            if char == '\b':continue
-            s.set_char((start_x + idx, start_y), MAP[char], fore, back, c)
+            if char == '\f' or char == '\t':continue
+            if char == '\n': 
+                idx_shift = idx + 1
+                line_shift += 1
+                continue
+            if char == '\r':
+                idx_shift = idx + 1
+                continue
+            s.set_char((start_x + idx - idx_shift, start_y - line_shift), MAP[char], fore, back, c)
 
     def draw_box(self, left: int, bottom: int, width: int, height: int, bound: Boundary | int = Boundary.NONE, fore: Color = None, back: Color = None, is_filled: bool = True, is_edged: bool = True):
         l, b = left, bottom
@@ -127,6 +137,8 @@ class Terminal:
     def draw_row(self, row: int, start: int = 0, stop: int = None, step: int = 1, char: str = None, fore: Color = None, back: Color = None):
         s = self.screen
         c = self.char_sheet
+        if char is not None:
+            char = MAP[char]
         stop = stop if stop is not None else s.char_count[0]
         for idx in range(start, stop, step):
             s.set_char((idx, row), char, fore, back, c)
@@ -134,6 +146,8 @@ class Terminal:
     def draw_column(self, column: int, start: int = 0, stop: int = None, step: int= 1, char: str = None, fore: Color = None, back: Color = None):
         s = self.screen
         c = self.char_sheet
+        if char is not None:
+            char = MAP[char]
         stop = stop if stop is not None else s.char_count[1]
         for idx in range(start, stop, step):
             s.set_char((column, idx), char, fore, back, c)

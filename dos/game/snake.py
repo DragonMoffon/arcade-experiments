@@ -63,6 +63,7 @@ class SnakeApp(App):
             self.food.remove(new)
         elif new in self.snake_body:
             self.reset()
+            self.last_open_tick = tick
             return
 
         self.snake_body.insert(0, new)
@@ -108,4 +109,6 @@ class SnakeApp(App):
             self.terminal.draw_char(l+1+pos[0], b+1+pos[1], back=(255, 255, 255))
 
         self.terminal.draw_text(0,0, f'length: {self.snake_size // 5 + 1}', (255, 255, 255))
-        self.terminal.draw_text(self.terminal.screen.char_count[0]-10, 0, f'time: {self.terminal.current_tick - self.last_open_tick}', (255, 255, 255))
+
+
+        self.terminal.draw_text(self.terminal.screen.char_count[0]-6-len(str(self.terminal.current_tick - self.last_open_tick)), 0, f'time: {self.terminal.current_tick - self.last_open_tick}', (255, 255, 255))

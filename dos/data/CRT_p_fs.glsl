@@ -16,7 +16,6 @@
 
 const float hardScan = -8.0;  // Scanline hardness
 const float hardPix = -6.0;  // hardness of scanlined pixels
-const vec2 warp = vec2(1.0/32.0, 1.0/24.0);  // Display warp, should technically be circluar, but due to how the masking works that looks wrong.
 
 // Amount of shadow mask to make the rgb pixel
 const float maskDark=1.0;
@@ -49,7 +48,7 @@ vec3 ToSrgb(vec3 c){return vec3(ToSrgb1(c.r),ToSrgb1(c.g),ToSrgb1(c.b));}
 // Also zero's off screen.
 vec4 Fetch(vec2 pos, vec2 off){
     pos = floor(pos*source_size+off) / source_size;
-    if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5) return vec4(0.0);
+    // if(max(abs(pos.x-0.5),abs(pos.y-0.5))>0.5) return vec4(0.0);
     return vec4(ToLinear(texture(source_texture, pos.xy).rgb), 1.0);
 }
 
@@ -114,11 +113,7 @@ vec4 Tri(vec2 pos){
 }
 
 // Distortion of scanlines, and end of screen alpha.
-vec2 Warp(vec2 pos){
-    pos=pos*2.0-1.0;
-    pos*=vec2(1.0+(pos.y*pos.y)*warp.x,1.0+(pos.x*pos.x)*warp.y);
-    return pos*0.5+0.5;
-}
+
 
 // Shadow mask.
 vec4 Mask(vec2 pos){
@@ -132,7 +127,7 @@ vec4 Mask(vec2 pos){
 }    
 
 void main(){
-    vec2 pos = Warp(vs_uv);
+    vec2 pos = vs_uv;
     fs_colour = Tri(pos) * Mask(vs_uv * source_size);
     fs_colour.rgb = ToSrgb(fs_colour.rgb);
 }
