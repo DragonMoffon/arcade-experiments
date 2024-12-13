@@ -144,7 +144,6 @@ class OscWindow(Window):
 
     
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> bool | None:
-        return
         self.oscilliscope.pass_signal(2.0 * (x - self.center_x) / self.width, 2.0 * (y - self.center_y) / self.height, 5.0, 0.0)
         self.oscilliscope.process_signal()
     

@@ -333,8 +333,7 @@ class PlotWindow(Window):
         # Draw radius
         arcade.draw_circle_filled(0, 0, self.dist_limit * self.graph_size, (0, 0, 255, 32))
 
-        with self.ctx.pyglet_rendering():
-            self.batch.draw()
+        self.batch.draw()
 
         self.default_camera.use()
         # Draw current height

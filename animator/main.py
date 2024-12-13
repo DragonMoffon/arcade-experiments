@@ -46,7 +46,7 @@ class AnimWindow(Window):
 
     def on_draw(self):
         self.clear()
-        self.sprite.draw()
+        arcade.draw_sprite(self.sprite)
         self.rolling_digits.draw()
 
 

@@ -1,6 +1,7 @@
 import math
 
 from arcade import SpriteList, Window, camera, key, Sprite
+import arcade
 from arcade.screenshot import get_image
 
 from common.data_loading import make_package_path_finder
@@ -26,15 +27,13 @@ class App(Window):
             self.width / self.height,
             90,
             100.0,
-            20000.0,
-            self.ctx.viewport
+            20000.0
         )
         self._orthographic_data = camera.OrthographicProjectionData(
             -7000 * self._projection_data.aspect, 7000 * self._projection_data.aspect,
             -7000, 7000,
             100.0,
-            20000.0,
-            self.ctx.viewport
+            20000.0
         )
 
         self._camera = camera.PerspectiveProjector(view=self._camera_data, projection=self._projection_data)
@@ -137,7 +136,7 @@ class App(Window):
 
     def on_draw(self):
         self.clear()
-        self.stars.draw()
+        arcade.draw_sprite(self.stars)
         with self._camera_2.activate():
             self._renderer._texture_program['light'] = self._camera_data.forward
             self._renderer.draw()
