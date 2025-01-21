@@ -29,9 +29,9 @@ class DOSWindow(Window):
         # self.frame.add_process(TonemapAGX(self.ctx))
 
         self.snake = SnakeApp(self.terminal)
-        # self.terminal.launch(self.snake)
+        self.terminal.launch(self.snake)
         self.starcomm = StarCommApp(self.terminal)
-        self.terminal.launch(self.starcomm)
+        # self.terminal.launch(self.starcomm)
         self.tictactoe = SuperTicTacToeApp(self.terminal)
         # self.terminal.launch(self.tictactoe)
         self.scene_camera = arcade.Camera2D()

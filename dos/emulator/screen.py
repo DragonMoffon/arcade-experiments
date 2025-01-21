@@ -114,3 +114,14 @@ class Screen:
                 char.texture = self.default[start_char]
                 
                 back.color = colours.BLACK
+
+    def capture(self):
+        cap = []
+        for col in range(self.char_count[0]):
+            lis = []
+            cap.append(lis)
+            for row in range(self.char_count[1]):
+                char = self._character_grid[col][row]
+                back = self._character_grid[col][row]
+                lis.append((char.texture, char.char, char.color, back.color))
+        return cap

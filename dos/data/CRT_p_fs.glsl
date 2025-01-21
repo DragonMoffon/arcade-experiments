@@ -117,9 +117,9 @@ vec4 Tri(vec2 pos){
 
 // Shadow mask.
 vec4 Mask(vec2 pos){
-    pos.x += ceil(pos.y)*3.0;
+    pos.x += ceil(pos.y)*3;  // How wide each colour pixel is
     vec4 mask = vec4(vec3(maskDark), 1.0);
-    pos.x = fract(pos.x/6.0);
+    pos.x = fract(pos.x/6.0); // how many pixels each colour get (as a 3x factor)
     if (pos.x < 0.333) mask.r = maskLight;
     else if ( pos.x < 0.666) mask.g = maskLight;
     else mask.b = maskLight;

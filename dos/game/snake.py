@@ -32,10 +32,9 @@ class SnakeApp(App):
 
     def on_open(self, tick: int):
         self.last_open_tick = tick
-        self.terminal.reset_clear_commands()
-        self.terminal.add_clear_command(self.terminal.draw_row, -1, back=(255, 255, 255))
-        self.terminal.add_clear_command(self.terminal.draw_text, 1, -1, 'SNAKE V0.3', fore=(0, 0, 0))
-        self.terminal.clear()
+        with self.terminal.record_clear():
+            self.terminal.draw_row(-1, back=(255, 255, 255))
+            self.terminal.draw_text(1, -1, 'SNAKE V0.3', fore=(0, 0, 0))
         self.reset()
 
     def on_run(self, tick: int):

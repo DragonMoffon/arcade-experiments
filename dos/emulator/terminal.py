@@ -1,5 +1,6 @@
 from functools import partial
 from typing import Callable
+from contextlib import contextmanager
 
 import arcade
 from arcade.types import Color
@@ -21,11 +22,10 @@ class Terminal:
         self.window = window or arcade.get_window
 
         self.screen = Screen(CHAR_COUNT, CHAR_SIZE, position, window.ctx)
-        self.saved_clear_grid = [[]] # TODO
+        self.saved_clear_grid = self.screen.capture()
 
         self.char_sheet: CharSheet = None
 
-        self.clear_commands: list[Callable] = []
 
         self.awake_app: App = None
         self.asleep_apps: list[App] = []
@@ -69,15 +69,28 @@ class Terminal:
             
     # DRAW COMMANDS ----------------------------
     def clear(self):
-        self.screen.clear()
-        for command in self.clear_commands:
-            command()
+        if self.saved_clear_grid is None:
+            self.screen.clear()
+            return
+        for col in range(self.screen.char_count[0]):
+            for row in range(self.screen.char_count[1]):
+                char = self.screen._character_grid[col][row]
+                char.texture, char.char, char.color, self.screen._backing_grid[col][row].color = self.saved_clear_grid[col][row]
 
-    def add_clear_command(self, cmd: Callable, *args, **kwds):
-        self.clear_commands.append(partial(cmd, *args, **kwds))
 
-    def reset_clear_commands(self):
-        self.clear_commands = []
+    @contextmanager
+    def record_clear(self, reset: bool = True, clear: bool = True):
+        if reset:
+            self.reset_clear()
+        if clear:
+            self.clear()
+        try:
+            yield
+        finally:
+            self.saved_clear_grid = self.screen.capture()
+
+    def reset_clear(self):
+        self.saved_clear_grid = None
 
     def draw_char(self, x, y, char: str = None, fore: Color = None, back: Color = None):
         if char is not None:

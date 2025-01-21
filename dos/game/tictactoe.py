@@ -63,51 +63,18 @@ class SuperTicTacToeApp(App):
 
     def on_run(self, tick):
         self.draw()
-        self.terminal.reset_clear_commands()
-        # Draw Logo
-        self.terminal.add_clear_command(
-            self.terminal.draw_text,
-            57,
-            26,
-            logo_str,
-            (255, 255, 255),
-            (0, 0, 0)
-        )
-
-        # Draw Tic Tac Toe Grid
-        self.terminal.add_clear_command(
-            self.terminal.draw_row,
-            12, 32, 49, 1, '─', (255, 255, 255)
-
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_row,
-            16, 32, 49, 1, '─', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_column,
-            37, 9, 20, 1, '│', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_column,
-            43, 9, 20, 1, '│', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_char,
-            37, 12, '┼', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_char,
-            43, 12, '┼', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_char,
-            37, 16, '┼', (255, 255, 255)
-        )
-        self.terminal.add_clear_command(
-            self.terminal.draw_char,
-            43, 16, '┼', (255, 255, 255)
-        )
+        with self.terminal.record_clear():
+            # Draw Logo
+            self.terminal.draw_text(57, 26, logo_str, (255, 255, 255), (0, 0, 0))
+            # Draw Tic Tac Toe Grid
+            self.terminal.draw_row(12, 32, 49, 1, '─', (255, 255, 255))
+            self.terminal.draw_row(16, 32, 49, 1, '─', (255, 255, 255))
+            self.terminal.draw_column(37, 9, 20, 1, '│', (255, 255, 255))
+            self.terminal.draw_column(43, 9, 20, 1, '│', (255, 255, 255))
+            self.terminal.draw_char(37, 12, '┼', (255, 255, 255))
+            self.terminal.draw_char(43, 12, '┼', (255, 255, 255))
+            self.terminal.draw_char(37, 16, '┼', (255, 255, 255))
+            self.terminal.draw_char(43, 16, '┼', (255, 255, 255))
 
 
     def draw(self):
