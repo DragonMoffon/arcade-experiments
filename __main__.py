@@ -18,6 +18,7 @@ from progress.window import main as prog_main
 from overlay.window import main as over_main
 from oscilliscope.window import main as osc_main
 from dos.window import main as dos_main
+from portals.window import main as portal_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     main(
         {   
             "DOS Terminal": (dos_main, (), {}),
+            "Portal": (portal_main, (), {}),
             "Oscilliscope": (osc_main, (), {}),
             "Pool Demo [TEMP LOCATION]": (pool_main, (), {"show_fps": True}),
             "Perp Demo": (perp_main, (), {}),
@@ -42,6 +44,6 @@ if __name__ == '__main__':
             "Scale Visualizer 2D": (height2d_main, (), {}),
             "Scale Visualizer 3D": (height_main, (), {}),
             "WavRider": (wav_main, (), {"show_fps": True}),
-            "Overlay": (over_main, (), {})
+            "Overlay": (over_main, (), {}),
         }
     )

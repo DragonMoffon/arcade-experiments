@@ -2,9 +2,44 @@ from __future__ import annotations
 
 from math import pi
 import arcade
+import arcade.geometry
 from pyglet.math import Vec2, Vec3, Mat3
 
 DEG_TO_RADS = pi / 180.0
+
+def cross_2d(a: Vec2, b: Vec2):
+    return (a.x * b.y) - (a.y * b.x)
+
+def get_segment_intersection_fraction(p: Vec2, p_e: Vec2, q: Vec2, q_e: Vec2) -> float | None:
+    # https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+    # Same logic as segment intersection, but we don't do the final conversion to a Vec2.
+
+    # Find the diff from start to end of each segment
+    r = (p_e - p)
+    s = (q_e - q)
+
+    # Find the angle between the two diffs if they are parallel then we don't consider it an interaction
+    direction_interaction = cross_2d(r, s)
+
+    if direction_interaction == 0.0:
+        # logger.debug(f"segment<{p} - {p_e}> is parallel to segment<{q} - {q_e}>")
+        return None
+
+    # Find how the ratio of how far along each segment the interaction is
+    t_ratio = cross_2d((q - p), s)
+    u_ratio = cross_2d((q - p), r)
+
+    # Calculate the actual fraction distance along
+    t = t_ratio / direction_interaction
+    u = u_ratio / direction_interaction
+
+    # If t and u aren't between 0 and 1 then the intersection is outside the segments
+    if not (0.0 <= u <= 1.0 and 0.0 <= t <= 1.0):
+        # logger.debug(f"segment<{p} - {p_e}> misses segment<{q} - {q_e}>")
+        return None
+
+    # logger.debug(f"segment<{p} - {p_e}> intersects segment<{q} - {q_e}> at {p + r * t}")
+    return t
 
 class Portal:
 
@@ -86,6 +121,9 @@ class Portal:
         y = self._direction.dot(offset)
 
         return abs(x) <= self.width and abs(y) <= self.thickness
+    
+    def get_line(self):
+        return self.position - self.normal * self.width, self.position + self.normal * self.width
 
     def map_to(self, vector: Vec3):
         mat = Mat3(
@@ -130,7 +168,8 @@ class PortalWindow(arcade.Window):
 
         self.cooldown = -float('inf')
 
-        self.m_pos : Vec2 = Vec2(0.0, 0.0)
+        self.m_pos : Vec2 = Vec2()
+        self.o_pos : Vec2 = Vec2()
 
         self.drag_mode = False
         self.move_mouse = False
@@ -139,6 +178,8 @@ class PortalWindow(arcade.Window):
         self.clear()
         self.portal_a.draw()
         self.portal_b.draw()
+
+        arcade.draw_line(self.o_pos.x, self.o_pos.y, self.m_pos.x, self.m_pos.y, (255, 0, 0), 2)
 
     def on_update(self, delta_time: float):
         # When dragging don't tp
@@ -150,9 +191,9 @@ class PortalWindow(arcade.Window):
             self.set_mouse_cursor(self.get_system_mouse_cursor(self.CURSOR_NO))
             return
         self.set_mouse_cursor(self.get_system_mouse_cursor(self.CURSOR_DEFAULT))
-        
+
         # Check to tp portal a
-        if self.portal_a.check_overlap(self.m_pos):
+        if get_segment_intersection_fraction(self.o_pos, self.m_pos, *self.portal_a.get_line()) is not None:
             self.move_mouse = True
             new = self.portal_a.map_across(Vec3(*self.m_pos, 1.0))
             self.set_mouse_position(int(new.x), int(new.y))
@@ -161,7 +202,7 @@ class PortalWindow(arcade.Window):
 
 
         # Check to tp portal b
-        if self.portal_b.check_overlap(self.m_pos):
+        if get_segment_intersection_fraction(self.o_pos, self.m_pos, *self.portal_b.get_line()) is not None:
             self.move_mouse = True
             new = self.portal_b.map_across(Vec3(*self.m_pos, 1.0))
             self.set_mouse_position(int(new.x), int(new.y))
@@ -187,6 +228,7 @@ class PortalWindow(arcade.Window):
         self.dragged = None
 
     def on_mouse_motion(self, x, y, dx, dy):
+        self.o_pos = self.m_pos
         self.m_pos = Vec2(x, y)
         if self.move_mouse:
             self.move_mouse = False
