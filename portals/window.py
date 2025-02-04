@@ -127,30 +127,32 @@ class Portal:
 
     def map_to(self, vector: Vec3):
         mat = Mat3(
-            self._normal.x, self._direction.x, 0.0,
-            self._normal.y, self._direction.y, 0.0,
-            -self._offset.x, -self._offset.y, 1.0
+            self._normal.x / self.width, self._direction.x / self.width, 0.0,
+            self._normal.y / self.width, self._direction.y / self.width, 0.0,
+            -self._offset.x / self.width, -self._offset.y / self.width, 1.0
         )
         return mat @ vector
 
     def map_across(self, vector: Vec3):
+        s = 1.0 / self.width
         map_to = Mat3(
-            self._normal.x, self._direction.x, 0.0,
-            self._normal.y, self._direction.y, 0.0,
-            -self._offset.x, -self._offset.y, 1.0
+            self._normal.x * s, self._direction.x * s, 0.0,
+            self._normal.y * s, self._direction.y * s, 0.0,
+            -self._offset.x * s, -self._offset.y * s,  1.0
         )
         sibl = self.sibling
+        s = sibl.width
         map_out = Mat3(
-            -sibl._normal.x, -sibl._normal.y, 0.0,
-            -sibl._direction.x, -sibl._direction.y, 0.0,
+            -sibl._normal.x * s, -sibl._normal.y * s, 0.0,
+            -sibl._direction.x * s, -sibl._direction.y * s, 0.0,
             sibl.position.x, sibl.position.y, 1.0
         )
         return map_out @ map_to @ vector
 
     def map_out(self, vector: Vec3):
         mat = Mat3(
-            -self._normal.x, -self._normal.y, 0.0,
-            -self._direction.x, -self._direction.y, 0.0,
+            -self._normal.x * self.width, -self._normal.y * self.width, 0.0,
+            -self._direction.x * self.width, -self._direction.y * self.width, 0.0,
             self.position.x, self.position.y, 1.0
         )
         return mat @ vector
@@ -161,7 +163,7 @@ class PortalWindow(arcade.Window):
     def __init__(self):
         super().__init__(1280, 720, "portal")
         self.portal_a = Portal(Vec2(100, 100), Vec2.from_heading(DEG_TO_RADS * 60.0), 50.0, 2.0)
-        self.portal_b = Portal(Vec2(400, 600), Vec2.from_heading(DEG_TO_RADS * 230.0), 50.0, 2.0)
+        self.portal_b = Portal(Vec2(400, 600), Vec2.from_heading(DEG_TO_RADS * 230.0), 200.0, 2.0)
         self.portal_a.link(self.portal_b)
 
         self.dragged = None
@@ -184,11 +186,13 @@ class PortalWindow(arcade.Window):
     def on_update(self, delta_time: float):
         # When dragging don't tp
         if self.drag_mode or self.dragged:
+            self.o_pos = self.m_pos
             return
         
         # TP cooldown isn't done yet
-        if self.time - self.cooldown < 1.0:
+        if self.time - self.cooldown < 0.1:
             self.set_mouse_cursor(self.get_system_mouse_cursor(self.CURSOR_NO))
+            self.o_pos = self.m_pos
             return
         self.set_mouse_cursor(self.get_system_mouse_cursor(self.CURSOR_DEFAULT))
 
@@ -197,17 +201,22 @@ class PortalWindow(arcade.Window):
             self.move_mouse = True
             new = self.portal_a.map_across(Vec3(*self.m_pos, 1.0))
             self.set_mouse_position(int(new.x), int(new.y))
+            self.o_pos = self.m_pos
             self.cooldown = self.time
             return
+        
 
 
         # Check to tp portal b
         if get_segment_intersection_fraction(self.o_pos, self.m_pos, *self.portal_b.get_line()) is not None:
             self.move_mouse = True
-            new = self.portal_b.map_across(Vec3(*self.m_pos, 1.0))
+            new = self.portal_b.map_across(Vec3(*self.m_pos, 1.0))        
             self.set_mouse_position(int(new.x), int(new.y))
+            self.o_pos = self.m_pos
             self.cooldown = self.time
             return
+
+        self.o_pos = self.m_pos
 
     def on_mouse_press(self, x, y, button, modifiers):
         if not self.drag_mode:
@@ -228,7 +237,6 @@ class PortalWindow(arcade.Window):
         self.dragged = None
 
     def on_mouse_motion(self, x, y, dx, dy):
-        self.o_pos = self.m_pos
         self.m_pos = Vec2(x, y)
         if self.move_mouse:
             self.move_mouse = False
