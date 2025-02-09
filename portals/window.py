@@ -127,24 +127,24 @@ class Portal:
 
     def map_to(self, vector: Vec3):
         mat = Mat3(
-            self._normal.x / self.width, self._direction.x / self.width, 0.0,
-            self._normal.y / self.width, self._direction.y / self.width, 0.0,
-            -self._offset.x / self.width, -self._offset.y / self.width, 1.0
+            self._normal.x / self.width, self._direction.x, 0.0,
+            self._normal.y / self.width, self._direction.y, 0.0,
+            -self._offset.x / self.width, -self._offset.y, 1.0
         )
         return mat @ vector
 
     def map_across(self, vector: Vec3):
         s = 1.0 / self.width
         map_to = Mat3(
-            self._normal.x * s, self._direction.x * s, 0.0,
-            self._normal.y * s, self._direction.y * s, 0.0,
-            -self._offset.x * s, -self._offset.y * s,  1.0
+            self._normal.x * s, self._direction.x, 0.0,
+            self._normal.y * s, self._direction.y, 0.0,
+            -self._offset.x * s, -self._offset.y,  1.0
         )
         sibl = self.sibling
         s = sibl.width
         map_out = Mat3(
             -sibl._normal.x * s, -sibl._normal.y * s, 0.0,
-            -sibl._direction.x * s, -sibl._direction.y * s, 0.0,
+            -sibl._direction.x, -sibl._direction.y, 0.0,
             sibl.position.x, sibl.position.y, 1.0
         )
         return map_out @ map_to @ vector
