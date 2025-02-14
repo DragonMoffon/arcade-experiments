@@ -19,6 +19,7 @@ from overlay.window import main as over_main
 from oscilliscope.window import main as osc_main
 from dos.window import main as dos_main
 from portals.window import main as portal_main
+from instanced.window import main as instanced_main
 
 # TODO
 from rigidbody.window import main as rigid_main
@@ -45,5 +46,7 @@ if __name__ == '__main__':
             "Scale Visualizer 3D": (height_main, (), {}),
             "WavRider": (wav_main, (), {"show_fps": True}),
             "Overlay": (over_main, (), {}),
+            "Instanced (Style Rect Takeover)": (instanced_main, (), {}),
+            "Rigidbody": (rigid_main, (), {})
         }
     )

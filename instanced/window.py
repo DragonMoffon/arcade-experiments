@@ -53,6 +53,9 @@ class InstancedWindow(Window):
 
     def __init__(self):
         super().__init__(1280, 720, "Instanced", draw_rate=1/140, vsync=True, update_rate=1/10000, resizable=True)
+        self.camera = Camera2D()
+        self.base = self.camera.viewport.size
+
         self.points, self.colors, self.indices = gen_star(5)
 
         self.point_buffer = gl.BufferDescription(
@@ -80,8 +83,6 @@ class InstancedWindow(Window):
 
         self.text = Text("FPS: 0000", self.center_x, self.center_y, (255, 255, 255), anchor_x='center', anchor_y='center')
 
-        self.camera = Camera2D()
-        self.base = self.camera.viewport.size
 
         self.box_idx, self.box_points, self.box_colours = gen_stylebox(200, 200, self.center, (70.0, 70.0, 70.0, 70.0), (20.0, 20.0, 20.0, 20.0), resolution=12, inner_corner_radius_control=False, inner_colour=(0, 0, 0, 255), gradient=True)
 
@@ -107,19 +108,22 @@ class InstancedWindow(Window):
         )
 
     def on_resize(self, width, height):
-        # self.camera.match_window(projection=False, aspect=16.0/9.0)
-        self.camera.match_window(projection=False)
+        try:
+            # self.camera.match_window(projection=False, aspect=16.0/9.0)
+            self.camera.match_window(projection=False)
 
-        aspect = 16.0 / 9.0
-        v_aspect = width / height
+            aspect = 16.0 / 9.0
+            v_aspect = width / height
 
-        if aspect * height < width:
-            w = v_aspect * self.base[1]
-            h = self.base[1]
-        else:
-            w = self.base[0]
-            h = self.base[0] / v_aspect
-        self.camera.projection = XYWH(0.0, 0.0, w, h)
+            if aspect * height < width:
+                w = v_aspect * self.base[1]
+                h = self.base[1]
+            else:
+                w = self.base[0]
+                h = self.base[0] / v_aspect
+            self.camera.projection = XYWH(0.0, 0.0, w, h)
+        except AttributeError:
+            pass # I have no idea why this happens (and only when running from the picker window)
 
     def on_draw(self):
         self.clear()
@@ -155,7 +159,8 @@ class InstancedWindow(Window):
         #         # draw_triangle_outline(ax, ay, bx, by, cx, cy, (0, 255, 0), 2)
         #     # draw_points(self.box_points[:4*5], (255, 0, 0), 4)
 
-        self.box_geometry.render(self.box_shader)
+        with self.camera.activate():
+            self.box_geometry.render(self.box_shader)
 
     
     def on_update(self, delta_time):
