@@ -15,6 +15,28 @@ get_prog_string = make_package_string_loader(data, "glsl")
 
 from instanced.style_box import gen_stylebox
 
+from typing import TypeVar
+
+class Event:
+    pass
+
+class TestEvent(Event):
+    pass
+
+
+events: dict[type[Event], list[Event]] = {
+    Event: [Event()],
+    TestEvent: [TestEvent()]
+}
+
+a = events[TestEvent]
+
+def get_event[T: Event](event: type[T], idx: int) -> T:
+    return events[event][idx]
+
+result = get_event(TestEvent, -1)
+
+
 def gen_star(point: int):
 
     fraction = pi / point

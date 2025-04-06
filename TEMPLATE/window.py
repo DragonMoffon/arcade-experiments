@@ -1,7 +1,10 @@
-from arcade import Window
+from arcade import Window as ArcadeWindow
 
+__all__ = (
+    'main'
+)
 
-class TEMPLATEWindow(Window):
+class Window(ArcadeWindow):
 
     def __init__(self):
         super().__init__(1280, 720, "TEMPLATE")
@@ -14,5 +17,5 @@ class TEMPLATEWindow(Window):
 
 
 def main():
-    win = TEMPLATEWindow()
+    win = Window()
     win.run()
