@@ -376,6 +376,7 @@ def run_command(command: str, args: list[str], game: ScoundrelGame):
                 game.consume_card(card)
 
 def print_game(turn: int, game: ScoundrelGame):
+    print('\033[H\033[2J')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
     print(f'|----------TURN:{" "*(4 - len({turn}))}{turn}----------|')
     print(f'|----------{bcolors.HEALTH}HEALTH:{f" {game.health}" if game.health < 10 else game.health}{bcolors.END}----------|')
@@ -395,6 +396,7 @@ def print_game(turn: int, game: ScoundrelGame):
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
 
 def print_finish(turn: int, game: ScoundrelGame):
+    print('\033[2J')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
     print(f'{bcolors.TITLE_BG}|----------TURN:{" "*(4 - len({turn}))}{turn}----------|{bcolors.END_BG}')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}{'YOU   WON' if game.has_won else 'YOU  LOST'}{bcolors.END_FG}----------|{bcolors.END_BG}')
