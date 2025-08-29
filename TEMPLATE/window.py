@@ -1,7 +1,7 @@
 from arcade import Window as ArcadeWindow
 
 __all__ = (
-    'main'
+    'main',
 )
 
 class Window(ArcadeWindow):
