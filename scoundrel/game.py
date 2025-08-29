@@ -378,13 +378,13 @@ def run_command(command: str, args: list[str], game: ScoundrelGame):
 def print_game(turn: int, game: ScoundrelGame):
     print('\033[H\033[2J')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
-    print(f'|----------TURN:{" "*(4 - len({turn}))}{turn}----------|')
+    print(f'|----------TURN:{" "*(4 - len(str(turn)))}{turn}----------|')
     print(f'|----------{bcolors.HEALTH}HEALTH:{f" {game.health}" if game.health < 10 else game.health}{bcolors.END}----------|')
     print(f'|-ROOM------{bcolors.WEAPON}WEAPON{bcolors.END}---{bcolors.MONSTER}DEFEATED{bcolors.END}-|')
     length = max(len(game._room), len(game._defeated_monsters))
     for idx in range(length):
         card = game.peek_card(idx)
-        card_str = f"{idx}-{card}{'-' if card.value != 10 else ''}" if card is not None else '-------'
+        card_str = f"{idx}-{card}{'-' if card.value != 10 else ''}" if card is not None else '---------'
 
         weapon = game.weapon
         weapon_str = '-------' if weapon is None or idx != 0 else f"{weapon}{'-' if weapon.value != 10 else ''}"
@@ -398,7 +398,7 @@ def print_game(turn: int, game: ScoundrelGame):
 def print_finish(turn: int, game: ScoundrelGame):
     print('\033[2J')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
-    print(f'{bcolors.TITLE_BG}|----------TURN:{" "*(4 - len({turn}))}{turn}----------|{bcolors.END_BG}')
+    print(f'{bcolors.TITLE_BG}|----------TURN:{" "*(4 - len(str(turn)))}{turn}----------|{bcolors.END_BG}')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}{'YOU   WON' if game.has_won else 'YOU  LOST'}{bcolors.END_FG}----------|{bcolors.END_BG}')
     print(f'{bcolors.TITLE_BG}|----------{bcolors.TITLE}SCOUNDREL{bcolors.END_FG}----------|{bcolors.END_BG}')
 
