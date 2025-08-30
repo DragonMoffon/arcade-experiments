@@ -142,13 +142,10 @@ class Window(ArcadeWindow):
         self._k2_slider = Slider((self.center_x, 40), 200, 0.0, 2.0, 2.0)
         self._hovered_slider: Slider | None = None
 
-        points = (*((self.center_x + np.cos(t)*50, self.center_y + np.sin(t)*50) for t in np.linspace(0.0, 2*np.pi, 16, endpoint=False)),)
-        indices = (*((i, (i+1)%16) for i in range(16)), *((i, (i+8)%16) for i in range(8)))
-
         self.body = SoftBody(
             self._k1_slider.value, self._k2_slider.value, self._fixed_rate,
-            points,
-            indices
+            ((self.center_x-50, self.center_y+50), (self.center_x+50, self.center_y+50), (self.center_x+50, self.center_y-50), (self.center_x-50, self.center_y-50), (self.center_x, self.center_y),),
+            ((0, 1), (1, 2), (2, 3), (3, 0), (4, 0), (4, 1), (4, 2), (4, 3), (0, 2), (1, 3)),
         )
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
@@ -172,7 +169,7 @@ class Window(ArcadeWindow):
         if self._hovered_slider is None:
             self.body.add_point((x, y), float('inf'))
             idx = self.body.x.shape[0] - 1
-            self.body.add_conection((idx, 15), 0.0)
+            self.body.add_conection((idx, idx-1), 0.0)
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if self._hovered_slider is None:
